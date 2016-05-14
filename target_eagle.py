@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 def get_target():
-	return SYM_Eagle()
+	return Eagle()
 
 sym_scale = 100
 sym_wire_scale = 16
 
-class SYM_Eagle:
+class Eagle:
 
 	def __init__(self):
 

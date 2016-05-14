@@ -116,18 +116,18 @@ class DoubleRow:
 		y0 = (npin//2 - 1)/2 * E
 
 		for i in range(npin//2):
-			target.add_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
-			target.add_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
+			target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
+			target.add_pac_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
 
-		target.add_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
-		target.add_line('Silk', 0.1, [(-A.max/2, -B.max/2), (A.max/2, -B.max/2), (A.max/2, B.max/2), (-A.max/2, B.max/2), ('end',0)])
+		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
+		target.add_pac_line('Silk', 0.1, [(-A.max/2, -B.max/2), (A.max/2, -B.max/2), (A.max/2, B.max/2), (-A.max/2, B.max/2), ('end',0)])
 
 		if(self.part['mark'] == 'circle'):
 			d = 0.2
-			target.add_circle('Silk', d, (-A.nom/2 - 3*d, y0 + X/2 + 2*d))
+			target.add_pac_circle('Silk', d, (-A.nom/2 - 3*d, y0 + X/2 + 2*d))
 
 		if(self.part['mark'] == 'diode'):
-			target.add_rectangle('Silk', (-A.max/2, B.max/2), (0, -B.max/2))
+			target.add_pac_rectangle('Silk', (-A.max/2, B.max/2), (0, -B.max/2))
 
 if(__name__ == '__main__'):
 
@@ -156,10 +156,12 @@ if(__name__ == '__main__'):
 	soic8 = DoubleRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
 	diode = DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
 
-	target = target_eagle.get_target('SOIC8')
+	target = target_eagle.get_target()
+	target.add_package('SOP127P6-8')
 	soic8.gen(target)
 	target.output('soic8.scr')
 
-	target = target_eagle.get_target('diode0805')
-	soic8.gen(target)
+	target = target_eagle.get_target()
+	target.add_package('DIOM2012')
+	diode.gen(target)
 	target.output('diode.scr')
