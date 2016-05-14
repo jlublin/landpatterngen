@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 
-def get_target(name):
-	return SYM_Eagle(name)
+def get_target():
+	return SYM_Eagle()
 
 scale = 100
 wire_scale = 16
 
 class SYM_Eagle:
 
-	def __init__(self, name):
+	def __init__(self):
 
-		self.name = name
-		self.pins = []
-		self.lines = []
+		self.symbols = []
+
+
+	def add_symbol(self, name):
+
+		self.current_symbol = { 'name': name, 'pins': [], 'lines': [] }
+		self.symbols.append(self.current_symbol)
 
 
 	def output(self, path):
@@ -23,16 +27,19 @@ class SYM_Eagle:
 grid mil;
 set wire_bend 2;
 
-edit '{name}.sym';
-'''.format(name=self.name)
+'''
+		for symbol in self.symbols:
+			scr += 'edit \'{name}.sym\';\n'.format(name=symbol['name'])
 
-		scr += 'layer 94;\n'
+			scr += 'layer 94;\n'
 
-		for pin in self.pins:
-			scr += self.gen_pin(pin[0], pin[1])
+			for pin in symbol['pins']:
+				scr += self.gen_pin(pin[0], pin[1])
 
-		for line in self.lines:
-			scr += self.gen_line(line[1], line[2])
+			for line in symbol['lines']:
+				scr += self.gen_line(line[1], line[2])
+
+			scr += '\n'
 
 		f = open(path, 'w')
 		f.write(scr)
@@ -41,7 +48,7 @@ edit '{name}.sym';
 
 	def add_pin(self, id, pos):
 
-		self.pins.append([id, pos])
+		self.current_symbol['pins'].append([id, pos])
 
 
 	def gen_pin(self, id, pos):
@@ -55,7 +62,7 @@ edit '{name}.sym';
 		else:
 			layer = 98
 
-		self.lines.append([layer, width, vertices])
+		self.current_symbol['lines'].append([layer, width, vertices])
 
 
 	def gen_line(self, width, vertices):
@@ -80,7 +87,8 @@ edit '{name}.sym';
 
 if(__name__ == '__main__'):
 
-	target = get_target(('Diode'))
+	target = get_target()
+	target.add_symbol('Diode')
 
 	target.add_pin('A', (-1, 0))
 	target.add_pin('K', (2, 0))
