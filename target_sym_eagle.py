@@ -9,30 +9,43 @@ wire_scale = 16
 class SYM_Eagle:
 
 	def __init__(self, name):
-		self.scr = '''\
+
+		self.name = name
+		self.pins = []
+		self.lines = []
+
+
+	def output(self, path):
+
+		scr = '''\
 # Created by LandPatternGen
 
 grid mil;
 set wire_bend 2;
 
 edit '{name}.sym';
-'''.format(name=name)
+'''.format(name=self.name)
 
+		scr += 'layer 94;\n'
 
-	def output(self, path):
+		for pin in self.pins:
+			scr += self.gen_pin(pin[0], pin[1])
+
+		for line in self.lines:
+			scr += self.gen_line(line[1], line[2])
+
 		f = open(path, 'w')
-		f.write(self.scr)
+		f.write(scr)
 		f.close
 
 
 	def add_pin(self, id, pos):
 
-		# TODO: Types and angle
+		self.pins.append([id, pos])
 
-		self.scr += '''\
-layer 94;
-pin '{id}' I/O None Point R0 Both 0 ({x} {y});
-'''.format(id=id, x=pos[0]*scale, y=pos[1]*scale);
+
+	def gen_pin(self, id, pos):
+		return 'pin \'{id}\' I/O None Point R0 Both 0 ({x} {y});\n'.format(id=id, x=pos[0]*scale, y=pos[1]*scale);
 
 
 	def add_line(self, layer_name, width, vertices):
@@ -41,6 +54,11 @@ pin '{id}' I/O None Point R0 Both 0 ({x} {y});
 			layer = 94
 		else:
 			layer = 98
+
+		self.lines.append([layer, width, vertices])
+
+
+	def gen_line(self, width, vertices):
 
 		wires = ''
 
@@ -57,10 +75,7 @@ pin '{id}' I/O None Point R0 Both 0 ({x} {y});
 							vertices[i+1][0]*scale,
 							vertices[i+1][1]*scale)
 
-		self.scr += '''\
-layer {};
-{}
-'''.format(layer, wires)
+		return wires
 
 
 if(__name__ == '__main__'):
