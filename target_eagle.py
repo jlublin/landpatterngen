@@ -117,7 +117,7 @@ set wire_bend 2;
 		if(layer_name == 'Symbols'):
 			layer = 94
 		else:
-			layer = 98
+			layer = 97
 
 		self.current_symbol['lines'].append([layer, width, vertices])
 
