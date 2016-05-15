@@ -188,7 +188,7 @@ set wire_bend 2;
 
 	def gen_pac_circle(self, diameter, pos):
 
-		return 'circle ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(pos[0], pos[1], pos[0] + diameter, pos[1])
+		return 'circle 0 ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(pos[0], pos[1], pos[0] + diameter, pos[1])
 
 
 	def add_pac_rectangle(self, layer_name, pos1, pos2):
