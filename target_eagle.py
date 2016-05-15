@@ -16,13 +16,13 @@ class Eagle:
 
 	def add_symbol(self, name):
 
-		self.current_symbol = { 'name': name, 'pins': [], 'lines': [] }
+		self.current_symbol = { 'name': name, 'pins': [], 'lines': [], 'texts': [] }
 		self.symbols.append(self.current_symbol)
 
 
 	def add_package(self, name):
 
-		self.current_package = { 'name': name, 'pads': [], 'lines': [], 'circles': [], 'rectangles': [] }
+		self.current_package = { 'name': name, 'pads': [], 'lines': [], 'circles': [], 'rectangles': [] , 'texts': []}
 		self.packages.append(self.current_package)
 
 
@@ -51,6 +51,13 @@ set wire_bend 2;
 					scr += 'layer {};\n'.format(line[0])
 
 				scr += self.gen_sym_line(line[1], line[2])
+
+			for text in symbol['texts']:
+
+				if(text[0] != current_layer):
+					scr += 'layer {};\n'.format(text[0])
+
+				scr += self.gen_sym_text(text[1], text[2])
 
 			scr += '\n'
 
@@ -83,6 +90,13 @@ set wire_bend 2;
 					scr += 'layer {};\n'.format(rect[0])
 
 				scr += self.gen_pac_rectangle(rect[1], rect[2])
+
+			for text in package['texts']:
+
+				if(text[0] != current_layer):
+					scr += 'layer {};\n'.format(text[0])
+
+				scr += self.gen_pac_text(text[1], text[2])
 
 			scr += '\n'
 
@@ -191,7 +205,7 @@ set wire_bend 2;
 		return 'circle 0 ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(pos[0], pos[1], pos[0] + diameter, pos[1])
 
 
-	def add_pac_rectangle(self, layer_name, pos1, pos2):
+	def  add_pac_rectangle(self, layer_name, pos1, pos2):
 
 		if(layer_name == 'Courtyard'):
 			layer = 41
@@ -209,6 +223,40 @@ set wire_bend 2;
 		return 'rect ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(pos1[0], pos1[1], pos2[0], pos2[1])
 
 
+	def add_sym_text(self, layer_name, text, pos):
+
+		if(layer_name == 'Name'):
+			layer = 95
+		elif(layer_name == 'Value'):
+			layer = 96
+		else:
+			layer = 97
+
+		self.current_symbol['texts'].append([layer, text, pos])
+
+
+	def gen_sym_text(self, text, pos):
+
+		return 'text \'{}\' R0 ({} {})'.format(text, pos[0] * sym_scale, pos[1] * sym_scale)
+
+
+	def add_pac_text(self, layer_name, text, pos):
+
+		if(layer_name == 'Name'):
+			layer = 25
+		elif(layer_name == 'Value'):
+			layer = 27
+		else:
+			layer = 51
+
+		self.current_package['texts'].append([layer, text, pos])
+
+
+	def gen_pac_text(self, text, pos):
+
+		return 'text \'{}\' R0 ({} {})'.format(text, pos[0], pos[1])
+
+
 if(__name__ == '__main__'):
 
 	target = get_target()
@@ -221,6 +269,7 @@ if(__name__ == '__main__'):
 	target.add_sym_line('Symbols', 1, [(0,0.5), (0,-0.5), (1,0), ('end',0)])
 	target.add_sym_line('Symbols', 1, [(1,0.5), (1,-0.5)])
 	target.add_sym_line('Symbols', 1, [(1,0), (2,0)])
+	target.add_sym_text('Name', '>NAME', (-1,1))
 
 	target.add_package('DIOM2012')
 
@@ -231,5 +280,6 @@ if(__name__ == '__main__'):
 	target.add_pac_line('Silk', 0.1, [(-0.5,-0.5), (0.5,-0.5)])
 	target.add_pac_line('Silk', 0.1, [(-0.5,0.5), (0.5,0.5)])
 	target.add_pac_rectangle('Silk', (-0.5,-0.5), (0,0.5))
+	target.add_pac_text('Name', '>NAME', (-0.5,0))
 
 	target.output('target_eagle_test.scr')
