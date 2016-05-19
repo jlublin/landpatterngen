@@ -324,6 +324,16 @@ if(__name__ == '__main__'):
 	sym = importlib.import_module('symbols.capacitor')
 	sym.draw(target)
 
+	target.add_symbol('NPN')
+
+	sym = importlib.import_module('symbols.npn')
+	sym.draw(target)
+
+	target.add_symbol('PNP')
+
+	sym = importlib.import_module('symbols.pnp')
+	sym.draw(target)
+
 	## Manually add a package
 
 	target.add_package('DIOM2012')
