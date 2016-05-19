@@ -16,7 +16,7 @@ class Eagle:
 
 	def add_symbol(self, name):
 
-		self.current_symbol = { 'name': name, 'pins': [], 'lines': [], 'texts': [] }
+		self.current_symbol = { 'name': name, 'pins': [], 'lines': [], 'rings': [], 'texts': [] }
 		self.symbols.append(self.current_symbol)
 
 
@@ -51,6 +51,13 @@ set wire_bend 2;
 					scr += 'layer {};\n'.format(line[0])
 
 				scr += self.gen_sym_line(line[1], line[2])
+
+			for ring in symbol['rings']:
+
+				if(ring[0] != current_layer):
+					scr += 'layer {};\n'.format(ring[0])
+
+				scr += self.gen_sym_ring(ring[1], ring[2], ring[3])
 
 			for text in symbol['texts']:
 
@@ -186,6 +193,26 @@ set wire_bend 2;
 							vertices[i+1][1])
 
 		return wires
+
+
+	def add_sym_ring(self, layer_name, width, diameter, pos):
+
+		if(layer_name == 'Symbols'):
+			layer = 94
+		else:
+			layer = 97
+
+		self.current_symbol['rings'].append([layer, width, diameter, pos])
+
+
+	def gen_sym_ring(self, width, diameter, pos):
+
+		return 'circle {:.3f} ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(
+			width * sym_wire_scale,
+			pos[0] * sym_scale,
+			pos[1] * sym_scale,
+			(pos[0] + diameter) * sym_scale,
+			pos[1] * sym_scale)
 
 
 	def add_pac_circle(self, layer_name, diameter, pos):
