@@ -272,6 +272,21 @@ if(__name__ == '__main__'):
 	sym = importlib.import_module('symbols.diode')
 	sym.draw(target)
 
+	target.add_symbol('LED')
+
+	sym = importlib.import_module('symbols.led')
+	sym.draw(target)
+
+	target.add_symbol('Zener')
+
+	sym = importlib.import_module('symbols.zener')
+	sym.draw(target)
+
+	target.add_symbol('Varicap')
+
+	sym = importlib.import_module('symbols.varicap')
+	sym.draw(target)
+
 	target.add_symbol('Resistor')
 
 	sym = importlib.import_module('symbols.resistor')
