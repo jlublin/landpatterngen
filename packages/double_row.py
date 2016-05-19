@@ -1,7 +1,3 @@
-import target_svg
-import target_eagle
-
-from ipc7351 import IPC7351
 from tollen import TolLen
 
 class DoubleRow:
@@ -128,40 +124,3 @@ class DoubleRow:
 
 		if(self.part['mark'] == 'diode'):
 			target.add_pac_rectangle('Silk', (-A.max/2, B.max/2), (0, -B.max/2))
-
-if(__name__ == '__main__'):
-
-	soic8 = {	'A': TolLen(3.9, 4.4),
-				'B': TolLen(4.9, 5.2),
-				'E': 1.27,
-				'L': TolLen(5.90, 6.10),
-				'T': TolLen(0.40, 1.27),
-				'W': TolLen(0.31, 0.51),
-				'npin': 8,
-				'mark': 'circle' }
-
-	diode = {	'A': TolLen(1.85, 2.15),
-				'B': TolLen(1.10, 1.40),
-				'E': 0,
-				'L': TolLen(1.85, 2.15),
-				'S': TolLen(0.55, 1.32),
-				'T': TolLen(0.15, 0.65),
-				'W': TolLen(1.10, 1.40),
-				'npin': 2,
-				'mark': 'diode' }
-
-	process = {	'F': TolLen(0, 0.05, 1),
-				'P': TolLen(0, 0.05, 1) }
-
-	soic8 = DoubleRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
-	diode = DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
-
-	target = target_eagle.get_target()
-	target.add_package('SOP127P6-8')
-	soic8.gen(target)
-	target.output('soic8.scr')
-
-	target = target_eagle.get_target()
-	target.add_package('DIOM2012')
-	diode.gen(target)
-	target.output('diode.scr')

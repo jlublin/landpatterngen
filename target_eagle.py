@@ -261,26 +261,28 @@ if(__name__ == '__main__'):
 
 	import importlib
 	import symbols
+	from tollen import TolLen
 
 	target = get_target()
 
+	## Add some symbols
+
 	target.add_symbol('Diode')
 
-	# Draw symbol from module
 	sym = importlib.import_module('symbols.diode')
 	sym.draw(target)
 
 	target.add_symbol('Resistor')
 
-	# Draw symbol from module
 	sym = importlib.import_module('symbols.resistor')
 	sym.draw(target)
 
 	target.add_symbol('Capacitor')
 
-	# Draw symbol from module
 	sym = importlib.import_module('symbols.capacitor')
 	sym.draw(target)
+
+	## Manually add a package
 
 	target.add_package('DIOM2012')
 
@@ -292,5 +294,42 @@ if(__name__ == '__main__'):
 	target.add_pac_line('Silk', 0.1, [(-0.5,0.5), (0.5,0.5)])
 	target.add_pac_rectangle('Silk', (-0.5,-0.5), (0,0.5))
 	target.add_pac_text('Name', '>NAME', (-0.5,0))
+
+	## Add some packages via parameters
+
+	from ipc7351 import IPC7351
+	dr = importlib.import_module('packages.double_row')
+
+	soic8 = {	'A': TolLen(3.9, 4.4),
+				'B': TolLen(4.9, 5.2),
+				'E': 1.27,
+				'L': TolLen(5.90, 6.10),
+				'T': TolLen(0.40, 1.27),
+				'W': TolLen(0.31, 0.51),
+				'npin': 8,
+				'mark': 'circle' }
+
+	diode = {	'A': TolLen(1.85, 2.15),
+				'B': TolLen(1.10, 1.40),
+				'E': 0,
+				'L': TolLen(1.85, 2.15),
+				'S': TolLen(0.55, 1.32),
+				'T': TolLen(0.15, 0.65),
+				'W': TolLen(1.10, 1.40),
+				'npin': 2,
+				'mark': 'diode' }
+
+	process = {	'F': TolLen(0, 0.05, 1),
+				'P': TolLen(0, 0.05, 1) }
+
+	target.add_package('SOP127P6-8')
+	soic8 = dr.DoubleRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
+	soic8.gen(target)
+
+	target.add_package('DIOM2012-C')
+	diode = dr.DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
+	diode.gen(target)
+
+	## Output result
 
 	target.output('target_eagle_test.scr')
