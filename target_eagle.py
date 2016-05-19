@@ -16,7 +16,7 @@ class Eagle:
 
 	def add_symbol(self, name):
 
-		self.current_symbol = { 'name': name, 'pins': [], 'lines': [], 'rings': [], 'texts': [] }
+		self.current_symbol = { 'name': name, 'pins': [], 'lines': [], 'arcs': [], 'rings': [], 'texts': [] }
 		self.symbols.append(self.current_symbol)
 
 
@@ -51,6 +51,14 @@ set wire_bend 2;
 					scr += 'layer {};\n'.format(line[0])
 
 				scr += self.gen_sym_line(line[1], line[2])
+
+			for arc in symbol['arcs']:
+
+				if(arc[0] != current_layer):
+					scr += 'layer {};\n'.format(arc[0])
+
+				scr += self.gen_sym_arc(arc[1], arc[2], arc[3], arc[4])
+
 
 			for ring in symbol['rings']:
 
@@ -193,6 +201,30 @@ set wire_bend 2;
 							vertices[i+1][1])
 
 		return wires
+
+
+	def add_sym_arc(self, layer_name, width, start, center, end):
+
+		if(layer_name == 'Symbols'):
+			layer = 94
+		else:
+			layer = 97
+
+		self.current_symbol['arcs'].append([layer, width, start, center, end])
+
+
+	def gen_sym_arc(self, width, start, center, end):
+
+		diameter = (2*center[0] - start[0], 2*center[1] - start[1])
+
+		return 'arc {:.3f} ({:.3f} {:.3f}) ({:.3f} {:.3f}) ({:.3f} {:.3f});\n'.format(
+			width * sym_wire_scale,
+			start[0] * sym_scale,
+			start[1] * sym_scale,
+			diameter[0] * sym_scale,
+			diameter[1] * sym_scale,
+			end[0] * sym_scale,
+			end[1] * sym_scale)
 
 
 	def add_sym_ring(self, layer_name, width, diameter, pos):
