@@ -356,6 +356,11 @@ if(__name__ == '__main__'):
 	sym = importlib.import_module('symbols.capacitor')
 	sym.draw(target)
 
+	target.add_symbol('Inductor')
+
+	sym = importlib.import_module('symbols.inductor')
+	sym.draw(target)
+
 	target.add_symbol('NPN')
 
 	sym = importlib.import_module('symbols.npn')
