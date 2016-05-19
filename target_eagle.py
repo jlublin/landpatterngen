@@ -259,17 +259,28 @@ set wire_bend 2;
 
 if(__name__ == '__main__'):
 
+	import importlib
+	import symbols
+
 	target = get_target()
 
 	target.add_symbol('Diode')
 
-	target.add_sym_pin('A', (-1, 0))
-	target.add_sym_pin('K', (2, 0))
-	target.add_sym_line('Symbols', 1, [(-1,0), (0,0)])
-	target.add_sym_line('Symbols', 1, [(0,0.5), (0,-0.5), (1,0), ('end',0)])
-	target.add_sym_line('Symbols', 1, [(1,0.5), (1,-0.5)])
-	target.add_sym_line('Symbols', 1, [(1,0), (2,0)])
-	target.add_sym_text('Name', '>NAME', (-1,1))
+	# Draw symbol from module
+	sym = importlib.import_module('symbols.diode')
+	sym.draw(target)
+
+	target.add_symbol('Resistor')
+
+	# Draw symbol from module
+	sym = importlib.import_module('symbols.resistor')
+	sym.draw(target)
+
+	target.add_symbol('Capacitor')
+
+	# Draw symbol from module
+	sym = importlib.import_module('symbols.capacitor')
+	sym.draw(target)
 
 	target.add_package('DIOM2012')
 
