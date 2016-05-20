@@ -1,7 +1,7 @@
 from tollen import TolLen
 
 import ipc7351
-import packages.double_row
+import packages.dual_row
 
 def get_package(part, design, process):
 	return SOT23(part, design, process)
@@ -48,7 +48,7 @@ class SOT23:
 			print('Cannot handle design {}'.format(design))
 			return
 
-		self.generator = packages.double_row.DoubleRow(part, design, process)
+		self.generator = packages.dual_row.DualRow(part, design, process)
 
 		# C,E,G,X,Y,Z
 	def gen(self, target):

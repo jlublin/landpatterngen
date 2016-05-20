@@ -1,6 +1,6 @@
 from tollen import TolLen
 
-class DoubleRow:
+class DualRow:
 
 	# part containts T, W, S, L, E, A, B, npin, deleted, mark
 	# design contaits J_H, J_T, J_S and CE

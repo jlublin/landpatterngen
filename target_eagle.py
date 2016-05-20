@@ -387,7 +387,7 @@ if(__name__ == '__main__'):
 	## Add some packages via parameters
 
 	from ipc7351 import IPC7351
-	dr = importlib.import_module('packages.double_row')
+	dr = importlib.import_module('packages.dual_row')
 
 	soic8 = {	'A': TolLen(3.9, 4.4),
 				'B': TolLen(4.9, 5.2),
@@ -423,11 +423,11 @@ if(__name__ == '__main__'):
 				'P': TolLen(0, 0.05, 1) }
 
 	target.add_package('SOP127P6-8')
-	soic8 = dr.DoubleRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
+	soic8 = dr.DualRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
 	soic8.gen(target)
 
 	target.add_package('DIOM2012-C')
-	diode = dr.DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
+	diode = dr.DualRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
 	diode.gen(target)
 
 	target.add_package('SOT23-3')
