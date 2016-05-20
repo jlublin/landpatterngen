@@ -112,13 +112,18 @@ class DualRow:
 
 		y0 = (npin//2 - 1)/2 * E
 
-		for i in range(npin//2):
+		# Add pads
+		pin = 1
+		for i in range(npin):
 			if(deleted == None or (i+1) not in deleted):
-				target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
+				if(i < npin//2):
+					target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), pin)
+				else:
+					target.add_pac_pad(0, 0, (Y, X), (C/2, -y0 + (i-npin//2)*E), pin)
 
-			if(deleted == None or (npin-i) not in deleted):
-				target.add_pac_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
+				pin += 1
 
+		# Add silk and courtyard
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
 		target.add_pac_line('Silk', 0.1, [(-A.max/2, -B.max/2), (A.max/2, -B.max/2), (A.max/2, B.max/2), (-A.max/2, B.max/2), ('end',0)])
 
