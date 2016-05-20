@@ -13,13 +13,36 @@ class SOT23:
 	# process contains F and P
 	def __init__(self, part, design, process):
 
+		pins = part['npin']
+
 		part['npin'] = 6
-		part['deleted'] = [2, 4, 6]
+
+		if(pins == 3):
+			part['deleted'] = [2, 4, 6]
+
+		elif(pins == 5):
+			part['deleted'] = [2]
+
+		elif(pins == 6):
+			part['deleted'] = None
+
+		elif(pins == 8):
+			part['deleted'] = None
+			part['npin'] = 8
+
+		else:
+			print('Cannot handle SOT23 with {} pins'.format(pins))
+			return
+
 		part['mark'] = None
 
+		# IPC7351 density level A, B or C
 		if(design[0:8] == 'IPC7351-'):
 			density = design[8]
-			design = ipc7351.IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)'][density]
+			if(part['E'] > 0.625):
+				design = ipc7351.IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)'][density]
+			else:
+				design = ipc7351.IPC7351['Flat Ribbon L and Gull-Wing Leads (<= 0.625mm pitch)'][density]
 
 		else:
 			print('Cannot handle design {}'.format(design))

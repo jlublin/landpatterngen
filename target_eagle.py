@@ -410,13 +410,14 @@ if(__name__ == '__main__'):
 				'deleted': None,
 				'mark': 'diode' }
 
-	sot23 = {	'A': TolLen(1.20, 1.40),
+	sot23_3 = {	'A': TolLen(1.20, 1.40),
 				'B': TolLen(2.80, 3.00),
 				'E': 0.95,
 				'L': TolLen(2.30, 2.60),
 				'S': TolLen(1.10, 1.47),
 				'T': TolLen(0.45, 0.60),
-				'W': TolLen(0.36, 0.46)}
+				'W': TolLen(0.36, 0.46),
+				'npin': 3}
 
 	process = {	'F': TolLen(0, 0.05, 1),
 				'P': TolLen(0, 0.05, 1) }
@@ -429,10 +430,32 @@ if(__name__ == '__main__'):
 	diode = dr.DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
 	diode.gen(target)
 
-	target.add_package('SOT23')
+	target.add_package('SOT23-3')
 
 	mod = importlib.import_module('packages.sot23')
-	pac = mod.get_package(sot23, 'IPC7351-C', process)
+	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
+	pac.gen(target)
+
+	target.add_package('SOT23-5')
+	sot23_3['npin'] = 5
+
+	mod = importlib.import_module('packages.sot23')
+	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
+	pac.gen(target)
+
+	target.add_package('SOT23-6')
+	sot23_3['npin'] = 6
+
+	mod = importlib.import_module('packages.sot23')
+	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
+	pac.gen(target)
+
+	target.add_package('SOT23-8')
+	sot23_3['npin'] = 8
+	sot23_3['B'] += TolLen(0.95,0.95)
+
+	mod = importlib.import_module('packages.sot23')
+	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
 	pac.gen(target)
 
 	## Output result
