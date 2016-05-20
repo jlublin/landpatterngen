@@ -113,10 +113,10 @@ class DoubleRow:
 		y0 = (npin//2 - 1)/2 * E
 
 		for i in range(npin//2):
-			if(deleted and (i+1) not in deleted):
+			if(deleted == None or (i+1) not in deleted):
 				target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
 
-			if(deleted and (npin-i) not in deleted):
+			if(deleted == None or (npin-i) not in deleted):
 				target.add_pac_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
 
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
