@@ -2,7 +2,7 @@ from tollen import TolLen
 
 class DoubleRow:
 
-	# part containts T, W, S, L, etc
+	# part containts T, W, S, L, E, A, B, npin, deleted, mark
 	# design contaits J_H, J_T, J_S and CE
 	# process contains F and P
 	def __init__(self, part, design, process):
@@ -103,6 +103,7 @@ class DoubleRow:
 		Y = self.land['Y']
 		Z = self.land['Z']
 		npin = self.part['npin']
+		deleted = self.part['deleted']
 
 		CE = self.design['CE']
 
@@ -112,8 +113,11 @@ class DoubleRow:
 		y0 = (npin//2 - 1)/2 * E
 
 		for i in range(npin//2):
-			target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
-			target.add_pac_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
+			if(deleted and (i+1) not in deleted):
+				target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*E), i+1)
+
+			if(deleted and (npin-i) not in deleted):
+				target.add_pac_pad(0, 0, (Y, X), (C/2, y0 - i*E), npin-i)
 
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
 		target.add_pac_line('Silk', 0.1, [(-A.max/2, -B.max/2), (A.max/2, -B.max/2), (A.max/2, B.max/2), (-A.max/2, B.max/2), ('end',0)])

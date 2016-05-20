@@ -396,6 +396,7 @@ if(__name__ == '__main__'):
 				'T': TolLen(0.40, 1.27),
 				'W': TolLen(0.31, 0.51),
 				'npin': 8,
+				'deleted': None,
 				'mark': 'circle' }
 
 	diode = {	'A': TolLen(1.85, 2.15),
@@ -406,7 +407,16 @@ if(__name__ == '__main__'):
 				'T': TolLen(0.15, 0.65),
 				'W': TolLen(1.10, 1.40),
 				'npin': 2,
+				'deleted': None,
 				'mark': 'diode' }
+
+	sot23 = {	'A': TolLen(1.20, 1.40),
+				'B': TolLen(2.80, 3.00),
+				'E': 0.95,
+				'L': TolLen(2.30, 2.60),
+				'S': TolLen(1.10, 1.47),
+				'T': TolLen(0.45, 0.60),
+				'W': TolLen(0.36, 0.46)}
 
 	process = {	'F': TolLen(0, 0.05, 1),
 				'P': TolLen(0, 0.05, 1) }
@@ -418,6 +428,12 @@ if(__name__ == '__main__'):
 	target.add_package('DIOM2012-C')
 	diode = dr.DoubleRow(diode, IPC7351['Rectangular or Square-End Components (Capacitors and Resistors) (>= 1608 (0603))']['C'], process)
 	diode.gen(target)
+
+	target.add_package('SOT23')
+
+	mod = importlib.import_module('packages.sot23')
+	pac = mod.get_package(sot23, 'IPC7351-C', process)
+	pac.gen(target)
 
 	## Output result
 
