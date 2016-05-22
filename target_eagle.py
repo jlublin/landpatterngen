@@ -386,9 +386,6 @@ if(__name__ == '__main__'):
 
 	## Add some packages via parameters
 
-	from ipc7351 import IPC7351
-	dr = importlib.import_module('packages.dual_row')
-
 	soic8 = {	'E1': TolLen(3.9, 4.4),
 				'D': TolLen(4.9, 5.2),
 				'e': 1.27,
@@ -419,8 +416,24 @@ if(__name__ == '__main__'):
 				'b': TolLen(0.36, 0.46),
 				'npin': 3}
 
+	quad = {	'E1': TolLen(3.80, 3.20),
+				'D1': TolLen(2.80, 3.20),
+				'e': 0.95,
+				'E': TolLen(4.60, 5.80),
+				'D': TolLen(3.60, 3.80),
+				'L': TolLen(0.45, 0.60),
+				'b': TolLen(0.36, 0.46),
+				'npin1': 2,
+				'npin2': 3,
+				'deleted': None,
+				'mark': 'circle' }
+
 	process = {	'F': TolLen(0, 0.05, 1),
 				'P': TolLen(0, 0.05, 1) }
+
+	from ipc7351 import IPC7351
+
+	dr = importlib.import_module('packages.dual_row')
 
 	target.add_package('SOP127P6-8')
 	soic8 = dr.DualRow(soic8, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
@@ -456,6 +469,11 @@ if(__name__ == '__main__'):
 
 	mod = importlib.import_module('packages.sot23')
 	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
+	pac.gen(target)
+
+	qr = importlib.import_module('packages.quad_row')
+	target.add_package('QUAD-8')
+	pac = qr.QuadRow(quad, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
 	pac.gen(target)
 
 	## Output result

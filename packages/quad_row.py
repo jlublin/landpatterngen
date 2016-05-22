@@ -1,8 +1,8 @@
 from tollen import TolLen
 
-class DualRow:
+class QuadRow:
 
-	# part containts L, b, S, E, e, E1, D, npin, deleted, mark
+	# part containts L, b, S, E, e, E1, D, D1, npin, deleted, mark
 	# design contaits J_H, J_T, J_S and CE
 	# process contains F and P
 	def __init__(self, part, design, process):
@@ -64,13 +64,13 @@ class DualRow:
 		# Zmax = Qmax + Qtol - Etol
 
 		Q = E + J_T + J_T + F + P
-		Z =  Q.max + Q.tol - E.tol
+		Z1 =  Q.max + Q.tol - E.tol
 
 		# Q = S - 2*JH + F + P
 		# Gmin = Qmin - Qtol + Stol
 
 		Q = S - J_H - J_H + F + P
-		G =  Q.min - Q.tol + S.tol
+		G1 =  Q.min - Q.tol + S.tol
 
 		# Q = b + 2*JS + F + P
 		# Xmax = Qmax + Qtol - btol
@@ -78,17 +78,30 @@ class DualRow:
 		Q = b + J_S + J_S + F + P
 		X =  Q.max + Q.tol - b.tol
 
-		Y = (Z - G) / 2
-		C = G + Y
+		Y = (Z1 - G1) / 2 # TODO, reuse in both x, y-dimensions?
+		C1 = G1 + Y
+
+		# Next dimension
+
+		Q = E + J_T + J_T + F + P
+		Z2 =  Q.max + Q.tol - E.tol
+
+		Q = S - J_H - J_H + F + P
+		G2 =  Q.min - Q.tol + S.tol
+
+		C2 = G2 + Y
 
 		# TODO: trimming
 		# TODO: rounding (eg 1.05, 1.10 1.15 (c=0.05) x = round(x0/c)*c
 
-		self.land['C'] = round(C,1)
-		self.land['G'] = round(G,1)
+		self.land['C1'] = round(C1,1)
+		self.land['C2'] = round(C2,1)
+		self.land['G1'] = round(G1,1)
+		self.land['G2'] = round(G2,1)
 		self.land['X'] = round(X,1)
 		self.land['Y'] = round(Y,1)
-		self.land['Z'] = round(Z,1)
+		self.land['Z1'] = round(Z1,1)
+		self.land['Z2'] = round(Z2,1)
 
 
 		# C,e,G,X,Y,Z
@@ -96,41 +109,50 @@ class DualRow:
 
 		E1 = self.part['E1']
 		D = self.part['D']
+		D1 = self.part['D1']
 		e = self.part['e']
 		E = self.part['E']
 
-		C = self.land['C']
+		C1 = self.land['C1']
+		C2 = self.land['C2']
 		X = self.land['X']
 		Y = self.land['Y']
-		Z = self.land['Z']
-		npin = self.part['npin']
+		Z1 = self.land['Z1']
+		Z2 = self.land['Z2']
+		npin1 = self.part['npin1']
+		npin2 = self.part['npin2']
 		deleted = self.part['deleted']
 
 		CE = self.design['CE']
 
-		CEx = max(E.max, Z)/2 + CE
-		CEy = max(D.max, e*(npin//2 - 1) + X)/2 + CE
+		CEx = max(E.max, Z1)/2 + CE
+		CEy = max(D1.max, Z2)/2 + CE
 
-		y0 = (npin//2 - 1)/2 * e
+		y0 = (npin1 - 1)/2 * e
+		x0 = (npin2 - 1)/2 * e
 
 		# Add pads
 		pin = 1
-		for i in range(npin):
+		for i in range(2*npin1 + 2*npin2):
 			if(deleted == None or (i+1) not in deleted):
-				if(i < npin//2):
-					target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*e), pin)
+				if(i < npin1):
+					target.add_pac_pad(0, 0, (Y, X), (-C1/2, y0 - i*e), pin)
+				elif(i < npin1 + npin2):
+					j = i - npin1
+					target.add_pac_pad(0, 0, (X, Y), (-x0 + j*e, -C2/2), pin)
+				elif(i < 2*npin1 + npin2):
+					j = i - npin1 - npin2
+					target.add_pac_pad(0, 0, (Y, X), (C1/2, -y0 + j*e), pin)
 				else:
-					target.add_pac_pad(0, 0, (Y, X), (C/2, -y0 + (i-npin//2)*e), pin)
+					j = i - 2*npin1 - npin2
+					target.add_pac_pad(0, 0, (X, Y), (x0 - j*e, C2/2), pin)
 
 				pin += 1
 
 		# Add silk and courtyard
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
-		target.add_pac_line('Silk', 0.1, [(-E1.max/2, -D.max/2), (E1.max/2, -D.max/2), (E1.max/2, D.max/2), (-E1.max/2, D.max/2), ('end',0)])
+		target.add_pac_line('Silk', 0.1, [(-E1.max/2, -D1.max/2), (E1.max/2, -D1.max/2), (E1.max/2, D1.max/2), (-E1.max/2, D1.max/2), ('end',0)])
 
 		if(self.part['mark'] == 'circle'):
 			d = 0.2
 			target.add_pac_circle('Silk', d, (-E1.nom/2 - 3*d, y0 + X/2 + 2*d))
-
-		if(self.part['mark'] == 'diode'):
-			target.add_pac_rectangle('Silk', (-E1.max/2, D.max/2), (0, -D.max/2))
