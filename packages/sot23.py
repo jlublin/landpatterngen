@@ -8,7 +8,7 @@ def get_package(part, design, process):
 
 class SOT23:
 
-	# part contains T, W, S, L, A, B, E
+	# part contains L, b, S, E, e, E1, D
 	# design contais 'IPC7351-x' where x in {A,B,C}
 	# process contains F and P
 	def __init__(self, part, design, process):
@@ -39,7 +39,7 @@ class SOT23:
 		# IPC7351 density level A, B or C
 		if(design[0:8] == 'IPC7351-'):
 			density = design[8]
-			if(part['E'] > 0.625):
+			if(part['e'] > 0.625):
 				design = ipc7351.IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)'][density]
 			else:
 				design = ipc7351.IPC7351['Flat Ribbon L and Gull-Wing Leads (<= 0.625mm pitch)'][density]
@@ -50,7 +50,7 @@ class SOT23:
 
 		self.generator = packages.dual_row.DualRow(part, design, process)
 
-		# C,E,G,X,Y,Z
+
 	def gen(self, target):
 
 		self.generator.gen(target)

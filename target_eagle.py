@@ -389,34 +389,34 @@ if(__name__ == '__main__'):
 	from ipc7351 import IPC7351
 	dr = importlib.import_module('packages.dual_row')
 
-	soic8 = {	'A': TolLen(3.9, 4.4),
-				'B': TolLen(4.9, 5.2),
-				'E': 1.27,
-				'L': TolLen(5.90, 6.10),
-				'T': TolLen(0.40, 1.27),
-				'W': TolLen(0.31, 0.51),
+	soic8 = {	'E1': TolLen(3.9, 4.4),
+				'D': TolLen(4.9, 5.2),
+				'e': 1.27,
+				'E': TolLen(5.90, 6.10),
+				'L': TolLen(0.40, 1.27),
+				'b': TolLen(0.31, 0.51),
 				'npin': 8,
 				'deleted': None,
 				'mark': 'circle' }
 
-	diode = {	'A': TolLen(1.85, 2.15),
-				'B': TolLen(1.10, 1.40),
-				'E': 0,
-				'L': TolLen(1.85, 2.15),
+	diode = {	'E1': TolLen(1.85, 2.15),
+				'D': TolLen(1.10, 1.40),
+				'e': 0,
+				'E': TolLen(1.85, 2.15),
 				'S': TolLen(0.55, 1.32),
-				'T': TolLen(0.15, 0.65),
-				'W': TolLen(1.10, 1.40),
+				'L': TolLen(0.15, 0.65),
+				'b': TolLen(1.10, 1.40),
 				'npin': 2,
 				'deleted': None,
 				'mark': 'diode' }
 
-	sot23_3 = {	'A': TolLen(1.20, 1.40),
-				'B': TolLen(2.80, 3.00),
-				'E': 0.95,
-				'L': TolLen(2.30, 2.60),
+	sot23_3 = {	'E1': TolLen(1.20, 1.40),
+				'D': TolLen(2.80, 3.00),
+				'e': 0.95,
+				'E': TolLen(2.30, 2.60),
 				'S': TolLen(1.10, 1.47),
-				'T': TolLen(0.45, 0.60),
-				'W': TolLen(0.36, 0.46),
+				'L': TolLen(0.45, 0.60),
+				'b': TolLen(0.36, 0.46),
 				'npin': 3}
 
 	process = {	'F': TolLen(0, 0.05, 1),
@@ -452,7 +452,7 @@ if(__name__ == '__main__'):
 
 	target.add_package('SOT23-8')
 	sot23_3['npin'] = 8
-	sot23_3['B'] += TolLen(0.95,0.95)
+	sot23_3['D'] += TolLen(0.95,0.95)
 
 	mod = importlib.import_module('packages.sot23')
 	pac = mod.get_package(sot23_3, 'IPC7351-C', process)
