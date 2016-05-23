@@ -81,7 +81,7 @@ set wire_bend 2;
 			scr += 'grid mm\n'
 
 			for pad in package['pads']:
-				scr += self.gen_pac_pad(pad[2], pad[3], pad[4])
+				scr += self.gen_pac_pad(pad[0], pad[2], pad[3], pad[4])
 
 			current_layer = -1
 
@@ -134,11 +134,16 @@ set wire_bend 2;
 		self.current_package['pads'].append([type, angle, size, pos, number])
 
 
-	def gen_pac_pad(self, size, pos, number):
+	def gen_pac_pad(self, type, size, pos, number):
 
 		# TODO: Types and angle
 
-		return 'smd \'{id}\' {w} {h} -0 R0 ({x} {y});\n'.format(id=number, w=size[0], h=size[1], x=pos[0], y=pos[1]);
+		if(type == 0):
+			r = 0
+		elif(type == 1):
+			r = 100
+
+		return 'smd \'{id}\' {w} {h} -{r} R0 ({x} {y});\n'.format(id=number, w=size[0], h=size[1], r=r, x=pos[0], y=pos[1]);
 
 
 	def add_sym_line(self, layer_name, width, vertices):
@@ -428,6 +433,16 @@ if(__name__ == '__main__'):
 				'deleted': None,
 				'mark': 'circle' }
 
+	bga1 = {	'E': TolLen(5.60, 5.80),
+				'D': TolLen(5.60, 5.80),
+				'd': 0.95,
+				'e': 0.95,
+				'b': TolLen(0.36, 0.44),
+				'npin1': 5,
+				'npin2': 5,
+				'deleted': None,
+				'mark': 'circle' }
+
 	process = {	'F': TolLen(0, 0.05, 1),
 				'P': TolLen(0, 0.05, 1) }
 
@@ -474,6 +489,11 @@ if(__name__ == '__main__'):
 	qr = importlib.import_module('packages.quad_row')
 	target.add_package('QUAD-8')
 	pac = qr.QuadRow(quad, IPC7351['Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)']['B'], process)
+	pac.gen(target)
+
+	bga = importlib.import_module('packages.bga')
+	target.add_package('BGA')
+	pac = bga.BGA(bga1, IPC7351['Ball Grid Array']['B'], process)
 	pac.gen(target)
 
 	## Output result
