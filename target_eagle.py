@@ -12,6 +12,7 @@ class Eagle:
 
 		self.symbols = []
 		self.packages = []
+		self.devices = []
 
 
 	def add_symbol(self, name):
@@ -26,6 +27,12 @@ class Eagle:
 		self.packages.append(self.current_package)
 
 
+	def add_device(self, name, prefix, value, description):
+
+		self.current_device = { 'name': name, 'prefix': prefix, 'description': description, 'use_value': value, 'symbols': [], 'packages': []}
+		self.devices.append(self.current_device)
+
+
 	def output(self, path):
 
 		scr = '''\
@@ -34,6 +41,8 @@ class Eagle:
 set wire_bend 2;
 
 '''
+		# Generate symbols
+
 		for symbol in self.symbols:
 			scr += 'edit \'{name}.sym\';\n'.format(name=symbol['name'])
 			scr += 'grid mil\n'
@@ -76,6 +85,8 @@ set wire_bend 2;
 
 			scr += '\n'
 
+		# Generate packages
+
 		for package in self.packages:
 			scr += 'edit \'{name}.pac\';\n'.format(name=package['name'])
 			scr += 'grid mm\n'
@@ -112,6 +123,29 @@ set wire_bend 2;
 					scr += 'layer {};\n'.format(text[0])
 
 				scr += self.gen_pac_text(text[1], text[2])
+
+			scr += '\n'
+
+		# Generate devices
+
+		for device in self.devices:
+			scr += 'edit \'{name}.dev\';\n'.format(**device)
+			scr += 'prefix \'{prefix}\';\n'.format(**device)
+			scr += 'description \'{description}.dev\';\n'.format(**device)
+
+			if(device['use_value']):
+				scr += 'value on;\n'
+			else:
+				scr += 'value off;\n'
+
+			i = 0;
+			for symbol in device['symbols']:
+				scr += self.gen_dev_symbol(symbol, i)
+				i += 1
+
+			for package in device['packages']:
+				pass
+				scr += self.gen_dev_package(package)
 
 			scr += '\n'
 
@@ -321,6 +355,36 @@ set wire_bend 2;
 		return 'text \'{}\' R0 ({} {})'.format(text, pos[0], pos[1])
 
 
+	def add_dev_symbol(self, name):
+		self.current_device['symbols'].append(name)
+
+
+	def gen_dev_symbol(self, symbol, i):
+
+		return 'add {} \'{}\' next (0 {});'.format(symbol, chr(b'A'[0]+i), i)
+
+
+	def add_dev_package(self, name, attributes, connections):
+
+		package = { 'name': name,
+		            'attributes': attributes,
+		            'connections': connections }
+
+		self.current_device['packages'].append(package)
+
+
+	def gen_dev_package(self, package):
+		ret = 'package \'{}\';\n'.format(package['name'])
+
+		for connection in package['connections']:
+			ret += 'connect \'{}\' \'{}\';\n'.format(connection[0], connection[1])
+
+		for attribute in package['attributes']:
+			ret += 'attribute \'{}\' \'{}\';\n'.format(attribute[0], attribute[1])
+
+		return ret
+
+
 if(__name__ == '__main__'):
 
 	import importlib
@@ -495,6 +559,10 @@ if(__name__ == '__main__'):
 	target.add_package('BGA')
 	pac = bga.BGA(bga1, IPC7351['Ball Grid Array']['B'], process)
 	pac.gen(target)
+
+	target.add_device('BAT54', 'D', False, 'BAT54 diode')
+	target.add_dev_symbol('diode')
+	target.add_dev_package('SOT23-3', [], [['A.A', 1], ['A.K', 3]])
 
 	## Output result
 
