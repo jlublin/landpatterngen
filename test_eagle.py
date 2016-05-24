@@ -174,8 +174,10 @@ pac.gen(target)
 
 target.add_device('BAT54', 'D', False, 'BAT54 diode')
 target.add_dev_symbol('diode')
-target.add_dev_package('SOT23-3', [], [['A.A', 1], ['A.K', 3]])
+target.add_dev_package('SOT23-3', '', [], [['A.A', 1], ['A.K', 3]])
 
 ## Output result
 
-target.output('test_eagle.scr')
+f = open('test_eagle.scr', 'w')
+target.output(f)
+f.close()

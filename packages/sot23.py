@@ -13,6 +13,18 @@ class SOT23:
 	# process contains F and P
 	def __init__(self, part, design, process):
 
+		if(isinstance(part, list)):
+			p = part
+			part = {	'E1': TolLen(float(p[0][0]), float(p[0][1])),
+						'D': TolLen(float(p[1][0]), float(p[1][1])),
+						'e': float(p[2]),
+						'E': TolLen(float(p[3][0]), float(p[3][1])),
+						'S': TolLen(float(p[4][0]), float(p[4][1])),
+						'L': TolLen(float(p[5][0]), float(p[5][1])),
+						'b': TolLen(float(p[6][0]), float(p[6][1])),
+						'npin': int(p[7])}
+
+
 		pins = part['npin']
 
 		part['npin'] = 6

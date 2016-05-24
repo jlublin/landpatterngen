@@ -33,7 +33,7 @@ class Eagle:
 		self.devices.append(self.current_device)
 
 
-	def output(self, path):
+	def output(self, fout):
 
 		scr = '''\
 # Created by LandPatternGen
@@ -131,7 +131,7 @@ set wire_bend 2;
 		for device in self.devices:
 			scr += 'edit \'{name}.dev\';\n'.format(**device)
 			scr += 'prefix \'{prefix}\';\n'.format(**device)
-			scr += 'description \'{description}.dev\';\n'.format(**device)
+			scr += 'description \'{description}\';\n'.format(**device)
 
 			if(device['use_value']):
 				scr += 'value on;\n'
@@ -149,9 +149,7 @@ set wire_bend 2;
 
 			scr += '\n'
 
-		f = open(path, 'w')
-		f.write(scr)
-		f.close
+		fout.write(scr)
 
 
 	def add_sym_pin(self, id, pos):
@@ -361,12 +359,13 @@ set wire_bend 2;
 
 	def gen_dev_symbol(self, symbol, i):
 
-		return 'add {} \'{}\' next (0 {});'.format(symbol, chr(b'A'[0]+i), i)
+		return 'add {} \'{}\' next (0 {});\n'.format(symbol, chr(b'A'[0]+i), i)
 
 
-	def add_dev_package(self, name, attributes, connections):
+	def add_dev_package(self, name, variant, attributes, connections):
 
 		package = { 'name': name,
+		            'variant': variant,
 		            'attributes': attributes,
 		            'connections': connections }
 
@@ -374,7 +373,7 @@ set wire_bend 2;
 
 
 	def gen_dev_package(self, package):
-		ret = 'package \'{}\';\n'.format(package['name'])
+		ret = 'package \'{}\' \'{}\';\n'.format(package['name'], package['variant'])
 
 		for connection in package['connections']:
 			ret += 'connect \'{}\' \'{}\';\n'.format(connection[0], connection[1])
