@@ -86,26 +86,47 @@ class DualRow:
 		F = self.process['F']
 		P = self.process['P']
 
-		# Q = E + 2*JT + F + P
-		# Zmax = Qmax + Qtol - Etol
+		# Z
+		if('Z' in self.part):
+			Z = self.part['Z']
+		else:
+			# Q = E + 2*JT + F + P
+			# Zmax = Qmax + Qtol - Etol
 
-		Q = E + J_T + J_T + F + P
-		Z =  Q.max + Q.tol - E.tol
+			Q = E + J_T + J_T + F + P
+			Z =  Q.max + Q.tol - E.tol
 
-		# Q = S - 2*JH + F + P
-		# Gmin = Qmin - Qtol + Stol
+		# G
+		if('G' in self.part):
+			G = self.part['G']
+		else:
+			# Q = S - 2*JH + F + P
+			# Gmin = Qmin - Qtol + Stol
 
-		Q = S - J_H - J_H + F + P
-		G =  Q.min - Q.tol + S.tol
+			Q = S - J_H - J_H + F + P
+			G =  Q.min - Q.tol + S.tol
 
-		# Q = b + 2*JS + F + P
-		# Xmax = Qmax + Qtol - btol
+		# X
+		if('X' in self.part):
+			X = self.part['X']
+		else:
+			# Q = b + 2*JS + F + P
+			# Xmax = Qmax + Qtol - btol
 
-		Q = b + J_S + J_S + F + P
-		X =  Q.max + Q.tol - b.tol
+			Q = b + J_S + J_S + F + P
+			X =  Q.max + Q.tol - b.tol
 
-		Y = (Z - G) / 2
-		C = G + Y
+		# Y
+		if('Y' in self.part):
+			Y = self.part['Y']
+		else:
+			Y = (Z - G) / 2
+
+		# C
+		if('C' in self.part):
+			C = self.part['C']
+		else:
+			C = G + Y
 
 		# TODO: trimming
 		# TODO: rounding (eg 1.05, 1.10 1.15 (c=0.05) x = round(x0/c)*c
