@@ -1,7 +1,7 @@
 from tollen import TolLen
 
 '''
-Arguments: (E1) (D) e (E) (S) (L) (b) (E2 D2 c r) npin mark (deleted) (holes) lead_type
+Arguments: (E1) (D) e (E) (S) (L) (b) (E2 D2 c r) npin mark (deleted) (holes) lead_type (C G X Y Z)
 holes = (d, x, y)
 If C X Y Z predefined, use them instead as custom device
 '''
@@ -28,7 +28,12 @@ class DualRow:
 						'npin': int(p[7]),
 						'mark': p[8],
 						'deleted': p[9],
-						'holes': p[10]}
+						'holes': p[10],
+						'C': p[12][0],
+						'G': p[12][1],
+						'X': p[12][2],
+						'Y': p[12][3],
+						'Z': p[12][4] }
 
 			import ipc7351
 			design = ipc7351.IPC7351[p[11]]['B']
@@ -87,7 +92,7 @@ class DualRow:
 		P = self.process['P']
 
 		# Z
-		if('Z' in self.part):
+		if('Z' in self.part and self.part['Z']):
 			Z = self.part['Z']
 		else:
 			# Q = E + 2*JT + F + P
@@ -97,7 +102,7 @@ class DualRow:
 			Z =  Q.max + Q.tol - E.tol
 
 		# G
-		if('G' in self.part):
+		if('G' in self.part and self.part['G']):
 			G = self.part['G']
 		else:
 			# Q = S - 2*JH + F + P
@@ -107,7 +112,7 @@ class DualRow:
 			G =  Q.min - Q.tol + S.tol
 
 		# X
-		if('X' in self.part):
+		if('X' in self.part and self.part['X']):
 			X = self.part['X']
 		else:
 			# Q = b + 2*JS + F + P
@@ -117,20 +122,19 @@ class DualRow:
 			X =  Q.max + Q.tol - b.tol
 
 		# Y
-		if('Y' in self.part):
+		if('Y' in self.part and self.part['Y']):
 			Y = self.part['Y']
 		else:
 			Y = (Z - G) / 2
 
 		# C
-		if('C' in self.part):
+		if('C' in self.part and self.part['C']):
 			C = self.part['C']
 		else:
 			C = G + Y
 
 		# TODO: trimming
 		# TODO: rounding (eg 1.05, 1.10 1.15 (c=0.05) x = round(x0/c)*c
-
 		self.land['C'] = round(C,1)
 		self.land['G'] = round(G,1)
 		self.land['X'] = round(X,1)
