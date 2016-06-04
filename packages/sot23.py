@@ -1,5 +1,9 @@
 from tollen import TolLen
 
+'''
+Arguments: (E1) (D) e (E) (S) (L) (b) npin
+'''
+
 import ipc7351
 import packages.dual_row
 
