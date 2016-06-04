@@ -152,6 +152,7 @@ class DualRow:
 		Z = self.land['Z']
 		npin = self.part['npin']
 		deleted = self.part['deleted']
+		holes = self.part['holes']
 
 		CE = self.design['CE']
 
@@ -170,6 +171,11 @@ class DualRow:
 					target.add_pac_pad(0, 0, (Y, X), (C/2, -y0 + (i-npin//2)*e), pin)
 
 				pin += 1
+
+		# Add holes
+		if(holes):
+			for hole in holes:
+				target.add_pac_hole(hole[0], (hole[1], hole[2]))
 
 		# Add silk and courtyard
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])

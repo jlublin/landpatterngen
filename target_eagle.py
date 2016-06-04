@@ -23,7 +23,7 @@ class Eagle:
 
 	def add_package(self, name):
 
-		self.current_package = { 'name': name, 'pads': [], 'lines': [], 'circles': [], 'rectangles': [] , 'texts': []}
+		self.current_package = { 'name': name, 'pads': [], 'holes': [], 'lines': [], 'circles': [], 'rectangles': [] , 'texts': []}
 		self.packages.append(self.current_package)
 
 
@@ -93,6 +93,9 @@ set wire_bend 2;
 
 			for pad in package['pads']:
 				scr += self.gen_pac_pad(pad[0], pad[2], pad[3], pad[4])
+
+			for hole in package['holes']:
+				scr += self.gen_pac_hole(hole[0], hole[1])
 
 			current_layer = -1
 
@@ -176,6 +179,16 @@ set wire_bend 2;
 			r = 100
 
 		return 'smd \'{id}\' {w} {h} -{r} R0 ({x} {y});\n'.format(id=number, w=size[0], h=size[1], r=r, x=pos[0], y=pos[1]);
+
+
+	def add_pac_hole(self, diameter, pos):
+
+		self.current_package['holes'].append([diameter, pos])
+
+
+	def gen_pac_hole(self, diameter, pos):
+
+		return 'hole {d} ({x} {y});\n'.format(d=diameter, x=pos[0], y=pos[1]);
 
 
 	def add_sym_line(self, layer_name, width, vertices):

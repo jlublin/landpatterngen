@@ -51,6 +51,7 @@ class SOT23:
 			return
 
 		part['mark'] = None
+		part['holes'] = None
 
 		# IPC7351 density level A, B or C
 		if(design[0:8] == 'IPC7351-'):
