@@ -43,21 +43,27 @@ def get_tokens(s):
 		s2 = re.split(m3, s, maxsplit=1)
 		return [s2[1]] + get_tokens(s2[2])
 
-	# Token beginning with '-' so m5 doesn't take it
-	m4 = '(-[^ \(\)]+)'
+	# Token float number
+	m4 = '([+-]?[0-9]*\.[0-9]+)'
 	if(re.match(m4, s)):
 		s2 = re.split(m4, s, maxsplit=1)
-		return [s2[1]] + get_tokens(s2[2])
+		return [float(s2[1])] + get_tokens(s2[2])
 
-	# String token - but not e.g. -2.0
-	m5 = '(-)'
+	# Token int number
+	m5 = '([+-]?[0-9]+)'
 	if(re.match(m5, s)):
 		s2 = re.split(m5, s, maxsplit=1)
+		return [int(s2[1])] + get_tokens(s2[2])
+
+	# String token - for None
+	m6 = '(-)'
+	if(re.match(m6, s)):
+		s2 = re.split(m6, s, maxsplit=1)
 		return [None] + get_tokens(s2[2])
 
 	# String token without ''
-	m6 = '([^ \(\)]*)'
-	s2 = re.split(m6, s, maxsplit=1)
+	m7 = '([^ \(\)]*)'
+	s2 = re.split(m7, s, maxsplit=1)
 	return [s2[1]] + get_tokens(s2[2])
 
 def get_tree(tokens):
