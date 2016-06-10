@@ -23,7 +23,7 @@ class Eagle:
 
 	def add_package(self, name):
 
-		self.current_package = { 'name': name, 'pads': [], 'holes': [], 'lines': [], 'circles': [], 'rectangles': [] , 'texts': []}
+		self.current_package = { 'name': name, 'pads': [], 'mnt_pads': [], 'holes': [], 'lines': [], 'circles': [], 'rectangles': [] , 'texts': []}
 		self.packages.append(self.current_package)
 
 
@@ -93,6 +93,11 @@ set wire_bend 2;
 
 			for pad in package['pads']:
 				scr += self.gen_pac_pad(pad[0], pad[2], pad[3], pad[4])
+
+			i = 1
+			for mnt_pad in package['mnt_pads']:
+				scr += self.gen_pac_mnt_pad(mnt_pad[0], mnt_pad[1], i)
+				i += 1
 
 			for hole in package['holes']:
 				scr += self.gen_pac_hole(hole[0], hole[1])
@@ -179,6 +184,16 @@ set wire_bend 2;
 			r = 100
 
 		return 'smd \'{id}\' {w} {h} -{r} R0 ({x} {y});\n'.format(id=number, w=size[0], h=size[1], r=r, x=pos[0], y=pos[1]);
+
+
+	def add_pac_mnt_pad(self, size, pos):
+
+		self.current_package['mnt_pads'].append([size, pos])
+
+
+	def gen_pac_mnt_pad(self, size, pos, num):
+
+		return 'smd \'{id}\' {w} {h} -{r} R0 ({x} {y});\n'.format(id='MNTPAD{}'.format(num), w=size[0], h=size[1], r=0, x=pos[0], y=pos[1]);
 
 
 	def add_pac_hole(self, diameter, pos):
