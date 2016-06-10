@@ -1,7 +1,7 @@
 from tollen import TolLen
 
 '''
-Arguments: (E1) (D) e (E) (S) (L) (b) (E2 D2 c r) npin mark (deleted) (holes) lead_type (C G X Y Z)
+Arguments: (E1) (D) e (E) (S) (L) (b) (E2 D2 c r) npin mark (deleted) (holes) lead_type (C G X Y Z) (mount_pads) pin_order (row_offset1 row_offset2)
 holes = (d, x, y)
 If C X Y Z predefined, use them instead as custom device
 '''
@@ -33,7 +33,10 @@ class DualRow:
 						'G': p[12][1],
 						'X': p[12][2],
 						'Y': p[12][3],
-						'Z': p[12][4] }
+						'Z': p[12][4],
+						'mount_pads': p[13],
+						'pin_order': p[14],
+						'offsets': p[15] }
 
 			import ipc7351
 			design = ipc7351.IPC7351[p[11]]['B']
@@ -62,6 +65,16 @@ class DualRow:
 
 		if('E' not in part):
 			part['E'] = part['S'] + part['L'] + part['L']
+
+		if('mount_pads' not in part):
+			part['mount_pads'] = None
+
+		if('offsets' not in part):
+			part['offsets'] = [0, 0]
+		elif(part['offsets'][0] == None):
+			part['offsets'][0] = 0
+		elif(part['offsets'][1] == None):
+			part['offsets'][1] = 0
 
 		self.design = design
 		self.process = process
@@ -157,29 +170,58 @@ class DualRow:
 		npin = self.part['npin']
 		deleted = self.part['deleted']
 		holes = self.part['holes']
+		mount_pads = self.part['mount_pads']
 
 		CE = self.design['CE']
 
 		CEx = max(E.max, Z)/2 + CE
 		CEy = max(D.max, e*(npin//2 - 1) + X)/2 + CE
 
+		row1off, row2off = self.part['offsets']
+
 		y0 = (npin//2 - 1)/2 * e
 
+		# Generate pin mapping
+
+		pin_map = {} # Pin position (always 1 in upper left and CCW) to pin name
+
+		if('pin_order' in self.part and self.part['pin_order'] == 1):
+			pin = 2
+			# Deleted pins not implemented, not sure how it would work
+			for i in range(npin//2):
+
+				pin_map[i+1] = pin
+				pin += 2
+
+			pin = npin - 1
+			for i in range(npin//2, npin):
+				pin_map[i+1] = pin
+				pin -= 2
+
+		else:
+			pin = 1
+			for i in range(npin):
+				if(deleted == None or (i+1) not in deleted):
+					pin_map[i+1] = pin
+					pin += 1
+
 		# Add pads
-		pin = 1
 		for i in range(npin):
 			if(deleted == None or (i+1) not in deleted):
 				if(i < npin//2):
-					target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 - i*e), pin)
+					target.add_pac_pad(0, 0, (Y, X), (-C/2, y0 + row1off - i*e), pin_map[i+1])
 				else:
-					target.add_pac_pad(0, 0, (Y, X), (C/2, -y0 + (i-npin//2)*e), pin)
-
-				pin += 1
+					target.add_pac_pad(0, 0, (Y, X), (C/2, -y0 + row2off + (i-npin//2)*e), pin_map[i+1])
 
 		# Add holes
 		if(holes):
 			for hole in holes:
 				target.add_pac_hole(hole[0], (hole[1], hole[2]))
+
+		# Add mount pad
+		if(mount_pads):
+			for pad in mount_pads:
+				target.add_pac_mnt_pad((pad[0], pad[1]), (pad[2], pad[3]))
 
 		# Add silk and courtyard
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
