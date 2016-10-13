@@ -42,6 +42,13 @@ CREATE TABLE 'dev_pac_connections'
 	pin
 );
 
+CREATE TABLE 'symbols'
+(
+	id INTEGER PRIMARY KEY,
+	name,
+	type
+);
+
 CREATE TABLE 'packages'
 (
 	id INTEGER PRIMARY KEY,
@@ -49,11 +56,11 @@ CREATE TABLE 'packages'
 	type
 );
 
-CREATE TABLE 'deleted_pins' (package_id, pin);
-CREATE TABLE 'holes' (package_id, d, x, y);
-CREATE TABLE 'mount_pads' (package_id, w, h, x, y);
+CREATE TABLE 'pac_deleted_pins' (package_id, pin);
+CREATE TABLE 'pac_holes' (package_id, d, x, y);
+CREATE TABLE 'pac_mount_pads' (package_id, w, h, x, y);
 
--- Also has deleted pins, holes, mount_pads
+-- Also has deleted pins, holes, mount pads
 CREATE TABLE 'pac_dual_row'
 (
 	package_id,
@@ -98,7 +105,7 @@ INSERT INTO 'pac_sot23' VALUES
 	1.10, 1.47,
 	0.45, 0.60,
 	0.36, 0.46,
-	4
+	3
 );
 
 INSERT INTO 'packages' VALUES (NULL, 'SOT23-6', 'sot23');
@@ -128,13 +135,15 @@ INSERT INTO 'pac_dual_row' VALUES
 	0.36, 0.46,
 	76, '-',
 	'Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)',
-	'-', 6.0, 0.3, 1.55, 9.1,
+	NULL, 6.0, 0.3, 1.55, 9.1,
 	1,
 	-0.25, 0
 );
-INSERT INTO 'deleted_pins' VALUES (3, 38);
-INSERT INTO 'holes' VALUES (3, 1.1, -1.5, 10);
-INSERT INTO 'holes' VALUES (3, 1.6, -1.5, -10);
+INSERT INTO 'pac_deleted_pins' VALUES (3, 38);
+INSERT INTO 'pac_holes' VALUES (3, 1.1, -1.5, 10);
+INSERT INTO 'pac_holes' VALUES (3, 1.6, -1.5, -10);
+
+INSERT INTO 'symbols' VALUES (NULL, 'diode', 'diode');
 
 INSERT INTO 'devices' VALUES (NULL, 'BAT54', 'D', 0, 'BAT54 diode');
 INSERT INTO 'dev_symbols' VALUES(1, 'A', 'diode');

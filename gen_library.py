@@ -1,93 +1,19 @@
 #!/usr/bin/env python3
 import re
 import importlib
+import sqlite3
+import sys
 
-def parse_package(row):
-	tokens = get_tokens(row)
-	tree = get_tree(tokens)[0]
-	return tree
+def parse_tollens(part):
 
-def parse_symbol(row):
-	tokens = get_tokens(row)
-	tree = get_tree(tokens)[0]
-	return tree
+	keys = list(part.keys());
+	for key in keys:
+		if(key[-2:] == '_l' and
+		   key[:-2] + '_h' in part):
+			part[key[:-2]] = TolLen(float(part[key[:-2] + '_l']), float(part[key[:-2] + '_h']))
+			part.pop(key[:-2] + '_l');
+			part.pop(key[:-2] + '_h');
 
-def parse_device(row):
-	tokens = get_tokens(row)
-	tree = get_tree(tokens)[0]
-	return tree
-
-def get_tokens(s):
-
-	# Skip whitespaces
-	s = s.strip()
-
-	if(len(s) == 0):
-		return []
-
-	# Match 'string'
-	m1 = '\'([^\']*)\''
-	if(re.match(m1, s)):
-		s2 = re.split(m1, s, maxsplit=1)
-		return [s2[1]] + get_tokens(s2[2])
-
-	# Match (
-	m2 = '(\()'
-	if(re.match(m2, s)):
-		s2 = re.split(m2, s, maxsplit=1)
-		return [s2[1]] + get_tokens(s2[2])
-
-	# Match )
-	m3 = '(\))'
-	if(re.match(m3, s)):
-		s2 = re.split(m3, s, maxsplit=1)
-		return [s2[1]] + get_tokens(s2[2])
-
-	# Token float number
-	m4 = '([+-]?[0-9]*\.[0-9]+)'
-	if(re.match(m4, s)):
-		s2 = re.split(m4, s, maxsplit=1)
-		return [float(s2[1])] + get_tokens(s2[2])
-
-	# Token int number
-	m5 = '([+-]?[0-9]+)'
-	if(re.match(m5, s)):
-		s2 = re.split(m5, s, maxsplit=1)
-		return [int(s2[1])] + get_tokens(s2[2])
-
-	# String token - for None
-	m6 = '(-)'
-	if(re.match(m6, s)):
-		s2 = re.split(m6, s, maxsplit=1)
-		return [None] + get_tokens(s2[2])
-
-	# String token without ''
-	m7 = '([^ \(\)]*)'
-	s2 = re.split(m7, s, maxsplit=1)
-	return [s2[1]] + get_tokens(s2[2])
-
-def get_tree(tokens):
-
-	if(tokens == []):
-		return [], 0
-
-	tree = []
-	i = 0
-
-	while(i < len(tokens)):
-		t = tokens[i]
-
-		if(t == '('):
-			l, j = get_tree(tokens[(i+1):])
-			tree.append(l)
-			i += j + 2
-		elif(t == ')'):
-			return tree, i
-		else:
-			tree.append(tokens[i])
-			i += 1
-
-	return tree, i
 
 if(__name__ == '__main__'):
 	import sys
@@ -96,64 +22,78 @@ if(__name__ == '__main__'):
 	target = target_eagle.get_target()
 
 	if(len(sys.argv) < 2):
-		print('Usage: {} <in.lbr>'.format(sys.argv[0]))
+		print('Usage: {} <library.lbr>'.format(sys.argv[0]), file=sys.stderr)
 
-	f = open(sys.argv[1])
 	fout = open(1, 'w')
-
-	current = None
-
-	packages = []
-	symbols = []
-	devices = []
 
 	process = {	'F': TolLen(0, 0.05, 1),
 				'P': TolLen(0, 0.05, 1) }
 
-	for row in f:
+	conn = sqlite3.connect(sys.argv[1])
+	conn.row_factory = sqlite3.Row
+	c = conn.cursor()
 
-		if(row.startswith('# Packages')):
-			current = 'Packages'
-		elif(row.startswith('# Symbols')):
-			current = 'Symbols'
-		elif(row.startswith('# Devices')):
-			current = 'Devices'
+	# Print library
 
-		elif(current == 'Packages'):
-			packages.append(parse_package(row))
-		elif(current == 'Symbols'):
-			symbols.append(parse_symbol(row))
-		elif(current == 'Devices'):
-			devices.append(parse_device(row))
+	c.execute('SELECT * FROM library')
+	print('Library version: {}\nName: {}\n{}'.format(*c.fetchone()), file=sys.stderr)
 
-	for pac in packages:
-		if(pac == []):
-			continue
+	c.execute('SELECT * FROM symbols')
+	for sym in c.fetchall():
 
-		target.add_package(pac[0])
-		mod = importlib.import_module('packages.{}'.format(pac[1]))
-		pac = mod.get_package(pac[2:], 'IPC7351-B', process)
-		pac.gen(target)
-
-	for sym in symbols:
-		if(sym == []):
-			continue
-
-		target.add_symbol(sym[0])
-		sym = importlib.import_module('symbols.{}'.format(sym[1]))
+		target.add_symbol(sym['name'])
+		sym = importlib.import_module('symbols.{}'.format(sym['type']))
 		sym.draw(target)
 
-	for dev in devices:
-		if(dev == []):
-			continue
+	c.execute('SELECT * FROM packages')
+	for pac in c.fetchall():
+		package = dict(pac)
 
-		target.add_device(dev[0], dev[1], dev[2], dev[3])
+		if(package['type'] in ['dual_row', 'sot23']):
+			c.execute('SELECT * FROM pac_{} WHERE package_id = :id'.format(package['type']), {'id': pac[0]})
+			package.update(dict(c.fetchone()))
 
-		for sym in dev[4]:
-			target.add_dev_symbol(sym)
+		else:
+			print('Unknown type {}'.format(package['type']), file=sys.stderr)
+			sys.exit()
 
-		for pac in dev[5:]:
-			target.add_dev_package(pac[0], *pac[1:])
+		c.execute('SELECT * FROM pac_deleted_pins WHERE package_id = :id', {'id': pac[0]})
+		package['deleted_pins'] = [x['pin'] for x in c.fetchall()]
+
+		c.execute('SELECT * FROM pac_holes WHERE package_id = :id', {'id': pac[0]})
+		package['holes'] = [dict(x) for x in c.fetchall()]
+
+		c.execute('SELECT * FROM pac_mount_pads WHERE package_id = :id', {'id': pac[0]})
+		package['mount_pads'] = [dict(x) for x in c.fetchall()]
+
+		parse_tollens(package)
+		target.add_package(package['name'])
+		mod = importlib.import_module('packages.{}'.format(package['type']))
+		pac = mod.get_package(package, 'IPC7351-B', process)
+		pac.gen(target)
+
+
+	c.execute('SELECT * FROM devices')
+	for dev in c.fetchall():
+		device = dict(dev)
+		device.update({'symbols': [], 'packages': []})
+
+		c.execute('SELECT * FROM dev_symbols WHERE device_id = :id', {'id': dev[0]})
+		for sym in [dict(x) for x in c.fetchall()]:
+			device['symbols'].append(sym)
+
+		for pac in c.execute('SELECT * FROM dev_packages WHERE device_id = :id', {'id': dev[0]}):
+			package = dict(pac)
+
+			c.execute('SELECT * FROM dev_pac_attributes WHERE dev_pac_id = :id', {'id': pac[0]})
+			package['attributes'] = [dict(x) for x in c.fetchall()]
+
+			c.execute('SELECT * FROM dev_pac_connections WHERE dev_pac_id = :id', {'id': pac[0]})
+			package['connections'] = [dict(x) for x in c.fetchall()]
+
+			device['packages'].append(package)
+
+		target.add_device(device)
 
 	target.output(fout)
 	fout.close()
