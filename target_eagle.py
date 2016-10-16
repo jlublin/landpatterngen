@@ -27,9 +27,10 @@ class Eagle:
 		self.packages.append(self.current_package)
 
 
-	def add_device(self, name, prefix, value, description):
+#	def add_device(self, name, prefix, value, description):
+	def add_device(self, device):
 
-		self.current_device = { 'name': name, 'prefix': prefix, 'description': description, 'use_value': value, 'symbols': [], 'packages': []}
+		self.current_device = device
 		self.devices.append(self.current_device)
 
 
@@ -141,7 +142,7 @@ set wire_bend 2;
 			scr += 'prefix \'{prefix}\';\n'.format(**device)
 			scr += 'description \'{description}\';\n'.format(**device)
 
-			if(device['use_value']):
+			if(device['value']):
 				scr += 'value on;\n'
 			else:
 				scr += 'value off;\n'
@@ -387,7 +388,7 @@ set wire_bend 2;
 
 	def gen_dev_symbol(self, symbol, i):
 
-		return 'add {} \'{}\' next (0 {});\n'.format(symbol, chr(b'A'[0]+i), i)
+		return 'add {} \'{}\' next (0 {});\n'.format(symbol['symbol'], chr(b'A'[0]+i), i)
 
 
 	def add_dev_package(self, name, variant, attributes, connections):
@@ -401,12 +402,13 @@ set wire_bend 2;
 
 
 	def gen_dev_package(self, package):
+
 		ret = 'package \'{}\' \'{}\';\n'.format(package['name'], package['variant'])
 
 		for connection in package['connections']:
-			ret += 'connect \'{}\' \'{}\';\n'.format(connection[0], connection[1])
+			ret += 'connect \'{}\' \'{}\';\n'.format(connection['name'], connection['pin'])
 
-		for attribute in package['attributes']:
-			ret += 'attribute \'{}\' \'{}\';\n'.format(attribute[0], attribute[1])
+#		for attribute in package['attributes']: # TODO
+#			ret += 'attribute \'{}\' \'{}\';\n'.format(attribute['dev_pac_id'], attribute['attribute'])
 
 		return ret

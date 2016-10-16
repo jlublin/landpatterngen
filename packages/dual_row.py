@@ -1,13 +1,19 @@
-from tollen import TolLen
+import sys
 
+from tollen import TolLen
+#TODO version
 '''
-Arguments: (E1) (D) e (E) (S) (L) (b) (E2 D2 c r) npin mark (deleted) (holes) lead_type (C G X Y Z) (mount_pads) pin_order (row_offset1 row_offset2)
+Arguments: (E1) (D) e (E) (S) (L) (b) npin mark (deleted) (holes) lead_type (C G X Y Z) (mount_pads) pin_order (row_offset1 row_offset2)
 holes = (d, x, y)
 If C X Y Z predefined, use them instead as custom device
+Unused: (E2 D2 c r)
 '''
 
 def get_package(part, design, process):
 	return DualRow(part, design, process)
+
+def get_params():
+	return ['E1:', 'D:', 'e', 'E:', 'S:', 'L:', 'b:', 'npin', 'mark', 'deleted*']
 
 class DualRow:
 
@@ -16,48 +22,28 @@ class DualRow:
 	# process contains F and P
 	def __init__(self, part, design, process):
 
-		if(isinstance(part, list)):
-			p = part
-			part = {	'E1': TolLen(float(p[0][0]), float(p[0][1])),
-						'D': TolLen(float(p[1][0]), float(p[1][1])),
-						'e': float(p[2]),
-						'E': TolLen(float(p[3][0]), float(p[3][1])),
-						'S': TolLen(float(p[4][0]), float(p[4][1])),
-						'L': TolLen(float(p[5][0]), float(p[5][1])),
-						'b': TolLen(float(p[6][0]), float(p[6][1])),
-						'npin': int(p[7]),
-						'mark': p[8],
-						'deleted': p[9],
-						'holes': p[10],
-						'C': p[12][0],
-						'G': p[12][1],
-						'X': p[12][2],
-						'Y': p[12][3],
-						'Z': p[12][4],
-						'mount_pads': p[13],
-						'pin_order': p[14],
-						'offsets': p[15] }
-
+		if(isinstance(design, str) and design[0:8] == 'IPC7351-'):
+			density = design[8]
 			import ipc7351
-			design = ipc7351.IPC7351[p[11]]['B']
+			design = ipc7351.IPC7351[part['lead_type']]['B']
 
 		for c in ['L', 'b', 'E1', 'e', 'D', 'npin']:
 			if(c not in part):
-				print('Missing "{}"'.format(c))
+				print('Missing "{}"'.format(c), file=sys.stderr)
 				return
 
 		for c in ['J_H', 'J_T', 'J_S', 'CE']:
 			if(c not in design):
-				print('Missing "{}"'.format(c))
+				print('Missing "{}"'.format(c), file=sys.stderr)
 				return
 
 		for c in ['F', 'P']:
 			if(c not in process):
-				print('Missing "{}"'.format(c))
+				print('Missing "{}"'.format(c), file=sys.stderr)
 				return
 
 		if('S' not in part and 'E' not in part):
-			print('Missing both "S" and "E"')
+			print('Missing both "S" and "E"', file=sys.stderr)
 			return
 
 		if('S' not in part):
@@ -68,13 +54,6 @@ class DualRow:
 
 		if('mount_pads' not in part):
 			part['mount_pads'] = None
-
-		if('offsets' not in part):
-			part['offsets'] = [0, 0]
-		elif(part['offsets'][0] == None):
-			part['offsets'][0] = 0
-		elif(part['offsets'][1] == None):
-			part['offsets'][1] = 0
 
 		self.design = design
 		self.process = process
@@ -168,7 +147,7 @@ class DualRow:
 		Y = self.land['Y']
 		Z = self.land['Z']
 		npin = self.part['npin']
-		deleted = self.part['deleted']
+		deleted = self.part['deleted_pins']
 		holes = self.part['holes']
 		mount_pads = self.part['mount_pads']
 
@@ -177,7 +156,8 @@ class DualRow:
 		CEx = max(E.max, Z)/2 + CE
 		CEy = max(D.max, e*(npin//2 - 1) + X)/2 + CE
 
-		row1off, row2off = self.part['offsets']
+		row1off = self.part.get('row_offset1') or 0
+		row2off = self.part.get('row_offset2') or 0
 
 		y0 = (npin//2 - 1)/2 * e
 
@@ -216,12 +196,12 @@ class DualRow:
 		# Add holes
 		if(holes):
 			for hole in holes:
-				target.add_pac_hole(hole[0], (hole[1], hole[2]))
+				target.add_pac_hole(hole['d'], (hole['x'], hole['y']))
 
 		# Add mount pad
 		if(mount_pads):
 			for pad in mount_pads:
-				target.add_pac_mnt_pad((pad[0], pad[1]), (pad[2], pad[3]))
+				target.add_pac_mnt_pad((pad['w'], pad['h']), (pad['x'], pad['y']))
 
 		# Add silk and courtyard
 		target.add_pac_line('Courtyard', 0.1, [(-CEx, -CEy), (CEx, -CEy), (CEx, CEy), (-CEx, CEy), ('end',0)])
