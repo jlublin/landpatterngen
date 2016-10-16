@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2">
    <item>
     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
      <item>
@@ -99,91 +99,10 @@
         </attribute>
         <layout class="QVBoxLayout" name="vert34">
          <item>
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="lineEdit"/>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="lineEdit_3"/>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="label_9">
-             <property name="text">
-              <string>Pins</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_4">
-             <property name="text">
-              <string>D</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QLineEdit" name="lineEdit_4"/>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>E1</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_5">
-             <property name="text">
-              <string>E</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLabel" name="label_8">
-             <property name="text">
-              <string>b</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="4">
-            <widget class="QLineEdit" name="lineEdit_6"/>
-           </item>
-           <item row="3" column="4">
-            <widget class="QLineEdit" name="lineEdit_8"/>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="lineEdit_2"/>
-           </item>
-           <item row="0" column="2" colspan="2">
-            <widget class="QLabel" name="label_6">
-             <property name="text">
-              <string>S</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QLabel" name="label_7">
-             <property name="text">
-              <string>L</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLineEdit" name="lineEdit_7"/>
-           </item>
-           <item row="3" column="2">
-            <widget class="QLabel" name="label_10">
-             <property name="text">
-              <string>e</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="4">
-            <widget class="QLineEdit" name="lineEdit_5"/>
-           </item>
-          </layout>
+          <layout class="QGridLayout" name="grid_values"/>
          </item>
          <item>
-          <widget class="QGraphicsView" name="graphicsView_2"/>
+          <widget class="QGraphicsView" name="package_info"/>
          </item>
         </layout>
        </widget>

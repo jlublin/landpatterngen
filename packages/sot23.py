@@ -10,6 +10,9 @@ import packages.dual_row
 def get_package(part, design, process):
 	return SOT23(part, design, process)
 
+def get_params():
+	return ['E1:', 'D:', 'e', 'E:', 'S:', 'L:', 'b:', 'npin']
+
 class SOT23:
 
 	# part contains L, b, S, E, e, E1, D

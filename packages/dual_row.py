@@ -12,6 +12,9 @@ Unused: (E2 D2 c r)
 def get_package(part, design, process):
 	return DualRow(part, design, process)
 
+def get_params():
+	return ['E1:', 'D:', 'e', 'E:', 'S:', 'L:', 'b:', 'npin', 'mark', 'deleted*']
+
 class DualRow:
 
 	# part containts L, b, S, E, e, E1, D, npin, mark, deleted, holes
