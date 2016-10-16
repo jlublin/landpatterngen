@@ -11,7 +11,9 @@ CREATE TABLE 'devices'
 	name,
 	prefix,
 	value, -- Bool: Has value
-	description
+	description,
+	manufacturer,
+	datasheet
 );
 
 CREATE TABLE 'dev_symbols'
@@ -53,7 +55,9 @@ CREATE TABLE 'packages'
 (
 	id INTEGER PRIMARY KEY,
 	name,
-	type
+	type,
+	manufacturer,
+	datasheet
 );
 
 CREATE TABLE 'pac_deleted_pins' (package_id, pin);
@@ -94,7 +98,7 @@ CREATE TABLE 'pac_sot23'
 
 INSERT INTO 'library' VALUES (0.2, 'Example', 'Example library');
 
-INSERT INTO 'packages' VALUES (NULL, 'SOT23-3', 'sot23');
+INSERT INTO 'packages' VALUES (NULL, 'SOT23-3', 'sot23', 'NXP', 'BAT54 SER Rev.5 "http://www.nxp.com/documents/data_sheet/BAT54_SER.pdf"');
 INSERT INTO 'pac_sot23' VALUES
 (
 	1, -- package_id
@@ -108,7 +112,7 @@ INSERT INTO 'pac_sot23' VALUES
 	3
 );
 
-INSERT INTO 'packages' VALUES (NULL, 'SOT23-6', 'sot23');
+INSERT INTO 'packages' VALUES (NULL, 'SOT23-6', 'sot23', 'NXP', 'BAT54 SER Rev.5 "http://www.nxp.com/documents/data_sheet/BAT54_SER.pdf"');
 INSERT INTO 'pac_sot23' VALUES
 (
 	2, -- package_id
@@ -122,7 +126,7 @@ INSERT INTO 'pac_sot23' VALUES
 	6
 );
 
-INSERT INTO 'packages' VALUES (NULL, 'TE-M.2', 'dual_row');
+INSERT INTO 'packages' VALUES (NULL, 'TE-M.2', 'dual_row', 'TE', '');
 INSERT INTO 'pac_dual_row' VALUES
 (
 	3, -- package_id
@@ -145,7 +149,7 @@ INSERT INTO 'pac_holes' VALUES (3, 1.6, -1.5, -10);
 
 INSERT INTO 'symbols' VALUES (NULL, 'diode', 'diode');
 
-INSERT INTO 'devices' VALUES (NULL, 'BAT54', 'D', 0, 'BAT54 diode');
+INSERT INTO 'devices' VALUES (NULL, 'BAT54', 'D', 0, 'BAT54 diode', 'NXP', 'BAT54 SER Rev.5 "http://www.nxp.com/documents/data_sheet/BAT54_SER.pdf"');
 INSERT INTO 'dev_symbols' VALUES(1, 'A', 'diode');
 INSERT INTO 'dev_packages' VALUES(NULL, 1, 'SOT23-3', '');
 INSERT INTO 'dev_pac_connections' VALUES(1, 'A.A', 1);
