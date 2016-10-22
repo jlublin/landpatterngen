@@ -7,7 +7,7 @@ import importlib
 import tempfile
 from tollen import TolLen
 
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidgetItem, QLabel, QLineEdit, QGraphicsScene
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidgetItem, QLabel, QLineEdit, QGraphicsScene, QMenu, QAction
 from PyQt5.QtCore import QObject, QCommandLineParser, Qt, QUrl
 from PyQt5.QtSvg import QSvgWidget, QGraphicsSvgItem
 from PyQt5 import uic, QtCore
@@ -114,8 +114,48 @@ class Editor:
 		# Show packages tab
 		self.wnd.tabWidget_2.setCurrentIndex(0)
 
+		# Add context menu for adding/removing entries
+		self.wnd.tabWidget_2.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.wnd.tabWidget_2.customContextMenuRequested.connect(self.on_table_context)
+
 		c.close()
 		conn.close()
+
+
+	def on_table_context(self, pos):
+
+		menu = QMenu('ctx menu', self.wnd)
+
+		tab_i = self.wnd.tabWidget_2.currentIndex()
+
+		if(tab_i == 0):
+			device = self.wnd.devices.currentRow()
+
+			add = QAction('Add device', self.wnd)
+			delete = QAction('Delete device', self.wnd)
+
+			add.triggered.connect(lambda: print('add device'))
+			delete.triggered.connect(lambda: print('delete {}'.format(device)))
+
+			menu.addAction(add)
+			menu.addAction(delete)
+
+		elif(tab_i == 1):
+			package = self.wnd.packages.currentRow()
+
+			add = QAction('Add package', self.wnd)
+			delete = QAction('Delete package', self.wnd)
+
+			add.triggered.connect(lambda: print('add package'))
+			delete.triggered.connect(lambda: print('delete {}'.format(package)))
+
+			menu.addAction(add)
+			menu.addAction(delete)
+
+		elif(tab_i == 2):
+			pass
+
+		menu.exec(self.wnd.tabWidget_2.mapToGlobal(pos))
 
 
 	def on_open(self):
