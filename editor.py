@@ -4,10 +4,12 @@ import sys, signal
 import sqlite3
 import re
 import importlib
+import tempfile
+from tollen import TolLen
 
-from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidgetItem, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QTableWidgetItem, QLabel, QLineEdit, QGraphicsScene
 from PyQt5.QtCore import QObject, QCommandLineParser, Qt, QUrl
-from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtSvg import QSvgWidget, QGraphicsSvgItem
 from PyQt5 import uic, QtCore
 
 class Editor:
@@ -76,11 +78,30 @@ class Editor:
 
 			# TODO, why doesn't a dictionary work here?
 			d = 'pac_' + pac['type']
-			c.execute('SELECT * FROM {}'.format(d))
+			c.execute('SELECT * FROM {} WHERE package_id=:id'.format(d), {'id': pac['id']})
 			values = c.fetchone()
 
 			self.packages[i]['values'] = dict(values)
 
+			# Add deleted pins
+			c.execute('SELECT pin FROM pac_deleted_pins WHERE package_id=:id', {'id': pac['id']})
+			deleted_pins = [x['pin'] for x in c.fetchall()]
+			if(deleted_pins):
+				self.packages[i]['values']['deleted_pins'] = deleted_pins
+
+			# Add holes
+			c.execute('SELECT d,x,y FROM pac_holes WHERE package_id=:id', {'id': pac['id']})
+			holes = [dict(x) for x in c.fetchall()]
+			if(holes):
+				self.packages[i]['values']['holes'] = holes
+
+			# Add mount pads
+			c.execute('SELECT w,h,x,y FROM pac_mount_pads WHERE package_id=:id', {'id': pac['id']})
+			mount_pads = [dict(x) for x in c.fetchall()]
+			if(mount_pads):
+				self.packages[i]['values']['mount_pads'] = mount_pads
+
+			# Add to Qt table
 			item = QTableWidgetItem(pac['type'])
 			item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
 			self.wnd.packages.setItem(i, 0, item)
@@ -140,6 +161,7 @@ class Editor:
 				min = package['values'][d[:-1] + '_l']
 				max = package['values'][d[:-1] + '_h']
 				val.setText('{} - {}'.format(min, max))
+				package['values'][d[:-1]] = TolLen(min, max)
 			elif(d[-1] == '*'):
 				pass
 			else:
@@ -156,6 +178,44 @@ class Editor:
 		w.package_info.setParent(None)
 		w.package_info = QSvgWidget('packages/{}.svg'.format(package['type']))
 		w.vert34.addWidget(w.package_info)
+
+		# Draw package
+#		f = tempfile.NamedTemporaryFile()
+		f = open('tmp.svg', 'wb')
+		import target_svg
+		target = target_svg.get_target()
+		target.add_package(package)
+
+		from pprint import pprint
+		pprint(package['values'])
+
+		process = {	'F': TolLen(0, 0.05, 1),
+					'P': TolLen(0, 0.05, 1) }
+		pac = mod.get_package(package['values'], 'IPC7351-B', process)
+		pac.gen(target)
+
+		target.output(f)
+		f.flush()
+
+#		w.horizontalLayout.removeWidget(w.graphicsView)
+#		w.graphicsView.setParent(None)
+#		w.graphicsView = QSvgWidget(f.name)
+#		w.horizontalLayout.addWidget(w.graphicsView)
+
+		svg = QGraphicsSvgItem(f.name)
+#		svg = QGraphicsSvgItem('test.svg')
+#		svg = QGraphicsSvgItem('packages/{}.svg'.format(package['type']))
+		scene = QGraphicsScene()
+		scene.addItem(svg)
+		# Units will be pixels...
+		w.graphicsView.setScene(scene)
+#		w.graphicsView.rotate(45)
+#		w.graphicsView.scale(10,10)
+#		w.graphicsView.translate(1e4,1e4)
+
+
+
+		f.close()
 
 
 	def on_devices_select(self):

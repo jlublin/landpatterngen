@@ -14,21 +14,99 @@ class SVG:
 		self.svg.write(path)
 
 
-	def add_pad(self, type, angle, size, pos, number):
+	def add_package(self, package):
+		'''
+		Target SVG only handles one drawing at a time, only last added drawing will be part of output
+		'''
+		self.svg = ET.parse('skeleton.svg')
+
+		self.package = \
+			{
+				'name': package['name'],
+				'pads': [],
+				'mnt_pads': [],
+				'holes': [],
+				'lines': [],
+				'circles': [],
+				'rectangles': [] ,
+				'texts': []
+			}
+
+
+	def output(self, fout):
+
+		import pprint
+		pprint.pprint(self.package)
+
+		package = self.package
+
+		for pad in package['pads']:
+			self.gen_pac_pad(pad)
+		if(0):
+			for mnt_pad in package['mnt_pads']:
+				self.gen_pac_mnt_pad(mnt_pad)
+
+			for hole in package['holes']:
+				self.gen_pac_hole(hole)
+
+			for line in package['lines']:
+				self.gen_pac_line(line)
+
+			for circle in package['circles']:
+				self.gen_pac_circle(circle)
+
+			for rect in package['rectangles']:
+				self.gen_pac_rectangle(rect)
+
+			for text in package['texts']:
+				self.gen_pac_text(text)
+
+		self.svg.write(fout)
+
+
+	def add_pac_pad(self, type, angle, size, pos, number):
+
+		self.package['pads'].append(
+			{
+				'type': type,
+				'angle': angle,
+				'size': size,
+				'pos': pos,
+				'number': number
+			})
+
+	def add_pac_hole(self, diameter, pos):
+
+		self.package['holes'].append(
+			{
+				'd': diameter,
+				'pos': pos
+			})
+
+	def add_pac_line(self, layer, width, vertices):
+
+		self.package['holes'].append(
+			{
+				'layer': layer,
+				'w': width,
+				'vertices': vertices
+			})
+
+	def gen_pac_pad(self, pad): # type, angle, size, pos, number
 		top_layer = self.svg.find('.//g[@id="Top"]')
 
 		# TODO: Types and angle
 
-		pad = ET.SubElement(top_layer, 'rect')
-		pad.set('style', 'fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:10;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1')
-		pad.set('id', 'pin_' + str(number))
-		pad.set('width', str(size[0]) + 'mm')
-		pad.set('height', str(size[1]) + 'mm')
-		pad.set('x', str(pos[0]) + 'mm')
-		pad.set('y', str(pos[1]) + 'mm')
+		el = ET.SubElement(top_layer, 'rect')
+		el.set('style', 'fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:10;stroke-linecap:square;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1')
+		el.set('id', 'pin_{}'.format(pad['number']))
+		el.set('width', '{}'.format(pad['size'][0]))
+		el.set('height', '{}'.format(pad['size'][1]))
+		el.set('x', '{}'.format(pad['pos'][0]))
+		el.set('y', '{}'.format(pad['pos'][1]))
 
 
-	def add_line(self, layer_name, width, vertices):
+	def gen_line(self, layer_name, width, vertices):
 
 		layer = self.svg.find('.//g[@id="{}"]'.format(layer_name))
 
@@ -57,7 +135,7 @@ class SVG:
 		line.set('d', pathdata)
 
 
-	def add_circle(self, layer_name, diameter, pos):
+	def gen_circle(self, layer_name, diameter, pos):
 
 		layer = self.svg.find('.//g[@id="{}"]'.format(layer_name))
 
@@ -79,8 +157,5 @@ class SVG:
 if(__name__ == '__main__'):
 
 	target = get_target()
-
-	target.add_pad(0, 0, (10, 20), (30, 40), 1)
-	target.add_line('Courtyard', 1, [(0,0), (50,50), (0,50)])
 
 	target.output('test.svg')
