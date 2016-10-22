@@ -233,7 +233,7 @@ class Editor:
 				min = float(r[0])
 				max = float(r[1])
 
-				package['values'][d[1]] = TolLen(min, max)
+				package['values'][d[0]] = TolLen(min, max)
 				self.update_package_view()
 
 		elif(d[1] == 'a'):
