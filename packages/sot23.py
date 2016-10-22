@@ -30,6 +30,7 @@ class SOT23:
 	def __init__(self, part, design, process):
 
 		part = copy.deepcopy(part)
+		self.generator = None
 
 		pins = part['npin']
 
@@ -39,13 +40,13 @@ class SOT23:
 
 		elif(pins == 5):
 			part['deleted_pins'] = [2]
+			part['npin'] = 6
 
 		elif(pins == 6):
 			part['deleted_pins'] = None
 
 		elif(pins == 8):
 			part['deleted_pins'] = None
-			part['npin'] = 8
 
 		else:
 			print('Cannot handle SOT23 with {} pins'.format(pins))
@@ -71,4 +72,5 @@ class SOT23:
 
 	def gen(self, target):
 
-		self.generator.gen(target)
+		if(self.generator):
+			self.generator.gen(target)
