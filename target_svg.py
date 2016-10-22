@@ -105,8 +105,8 @@ class SVG:
 		el.set('id', 'pin_{}'.format(pad['number']))
 		el.set('width', '{}'.format(pad['size'][0]*self.mmpx))
 		el.set('height', '{}'.format(pad['size'][1]*self.mmpx))
-		el.set('x', '{}'.format(pad['pos'][0]*self.mmpx))
-		el.set('y', '{}'.format(pad['pos'][1]*self.mmpx))
+		el.set('x', '{}'.format((pad['pos'][0] - pad['size'][0]/2)*self.mmpx))
+		el.set('y', '{}'.format((pad['pos'][1] - pad['size'][1]/2)*self.mmpx))
 
 
 	def gen_pac_hole(self, hole):
