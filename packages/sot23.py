@@ -1,3 +1,4 @@
+import copy
 from tollen import TolLen
 
 '''
@@ -19,6 +20,8 @@ class SOT23:
 	# design contais 'IPC7351-x' where x in {A,B,C}
 	# process contains F and P
 	def __init__(self, part, design, process):
+
+		part = copy.deepcopy(part)
 
 		pins = part['npin']
 

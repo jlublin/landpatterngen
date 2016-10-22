@@ -1,4 +1,5 @@
 import sys
+import copy
 
 from tollen import TolLen
 #TODO version
@@ -21,6 +22,8 @@ class DualRow:
 	# design contaits J_H, J_T, J_S and CE
 	# process contains F and P
 	def __init__(self, part, design, process):
+
+		part = copy.deepcopy(part)
 
 		if(isinstance(design, str) and design[0:8] == 'IPC7351-'):
 			density = design[8]
