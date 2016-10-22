@@ -39,10 +39,7 @@ class Editor:
 		devices = c.fetchall()
 		self.devices = [dict(x) for x in devices]
 
-		self.wnd.devices.setRowCount(len(devices))
-
-		device_names = [x['name'] for x in devices]
-		self.wnd.devices.setVerticalHeaderLabels(device_names)
+		self.update_devices_labels()
 
 		i = 0
 		for dev in devices:
@@ -51,14 +48,7 @@ class Editor:
 			packages = c.fetchall()
 			self.devices[i]['dev_packages'] = [dict(x) for x in packages]
 
-			package_names = [x['name'] for x in packages]
-			item = QTableWidgetItem(', '.join(package_names))
-			item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-			self.wnd.devices.setItem(i, 0, item)
-
-			self.wnd.devices.setItem(i, 1, QTableWidgetItem(dev['manufacturer']))
-			self.wnd.devices.setItem(i, 2, QTableWidgetItem(dev['description']))
-			self.wnd.devices.setItem(i, 3, QTableWidgetItem(dev['datasheet']))
+			self.set_device(dev, i)
 
 			i += 1
 
@@ -131,11 +121,11 @@ class Editor:
 		if(tab_i == 0):
 			device = self.wnd.devices.currentRow()
 
-			add = QAction('Add device', self.wnd)
+			add = QAction('Insert device before', self.wnd)
 			delete = QAction('Delete device', self.wnd)
 
-			add.triggered.connect(lambda: print('add device'))
-			delete.triggered.connect(lambda: print('delete {}'.format(device)))
+			add.triggered.connect(lambda: self.add_device(device))
+			delete.triggered.connect(lambda: self.delete_device(device))
 
 			menu.addAction(add)
 			menu.addAction(delete)
@@ -156,6 +146,58 @@ class Editor:
 			pass
 
 		menu.exec(self.wnd.tabWidget_2.mapToGlobal(pos))
+
+
+	def add_device(self, i):
+
+		device = \
+			{
+				'name': '',
+				'prefix': '',
+				'value': 0,
+				'description': '',
+				'manufacturer': '',
+				'datasheet': '',
+				'dev_packages': []
+			}
+
+		self.devices.insert(i, device)
+		self.wnd.devices.insertRow(i)
+		self.set_device(device, i)
+
+
+	def delete_device(self, i):
+
+		self.devices.pop(i)
+		self.wnd.devices.removeRow(i)
+
+
+	def update_devices_labels(self):
+
+		devices = self.devices
+		self.wnd.devices.setRowCount(len(devices))
+
+		device_names = [x['name'] for x in devices]
+		self.wnd.devices.setVerticalHeaderLabels(device_names)
+
+
+	def set_device(self, dev, i):
+
+		print(dev, i)
+
+		from pprint import pprint
+		pprint(self.devices)
+
+		packages = self.devices[i]['dev_packages']
+
+		package_names = [x['name'] for x in packages]
+		item = QTableWidgetItem(', '.join(package_names))
+		item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+		self.wnd.devices.setItem(i, 0, item)
+		self.wnd.devices.setItem(i, 1, QTableWidgetItem(dev['manufacturer']))
+		self.wnd.devices.setItem(i, 2, QTableWidgetItem(dev['description']))
+		self.wnd.devices.setItem(i, 3, QTableWidgetItem(dev['datasheet']))
 
 
 	def on_open(self):
@@ -321,6 +363,10 @@ class Editor:
 		oldw.widget().setParent(None)
 
 		i = self.wnd.devices.currentRow()
+
+		if(i >= len(self.devices)):
+			return # This can happen when removing entries
+
 		w.listPackages.addItems([x['name'] for x in self.devices[i]['dev_packages']])
 
 		w.name.setText(self.devices[i]['name'])
