@@ -135,9 +135,11 @@ class Editor:
 	def on_packages_select(self):
 
 		w = uic.loadUi('package.ui')
+		self.package_ui = w
 
 		i = self.wnd.packages.currentRow()
 		package = self.packages[i]
+		self.current_package = package
 
 		# Add package widget
 		oldw = self.wnd.verticalLayout_2.itemAt(1)
@@ -154,18 +156,20 @@ class Editor:
 		for d in mod.get_params():
 
 			val = QLineEdit()
-			w.grid_values.addWidget(QLabel(d), y, x + 0)
+			w.grid_values.addWidget(QLabel(d[0]), y, x + 0)
 			w.grid_values.addWidget(val, y, x + 1)
 
-			if(d[-1] == ':'):
-				min = package['values'][d[:-1] + '_l']
-				max = package['values'][d[:-1] + '_h']
+			val.textEdited.connect(lambda x, val=val, d=d: self.on_package_value_edited(d, val, x))
+
+			if(d[1] == 't'):
+				min = package['values'][d[0] + '_l']
+				max = package['values'][d[0] + '_h']
 				val.setText('{} - {}'.format(min, max))
-				package['values'][d[:-1]] = TolLen(min, max)
-			elif(d[-1] == '*'):
+				package['values'][d[0]] = TolLen(min, max)
+			elif(d[1] == 'a'):
 				pass
 			else:
-				v = package['values'][d]
+				v = package['values'][d[0]]
 				val.setText('{}'.format(v))
 
 			x += 2
@@ -179,15 +183,21 @@ class Editor:
 		w.package_info = QSvgWidget('packages/{}.svg'.format(package['type']))
 		w.vert34.addWidget(w.package_info)
 
+		self.update_package_view()
+
+
+	def update_package_view(self):
+
+		package = self.current_package
+
+		mod = importlib.import_module('packages.{}'.format(package['type']))
+
 		# Draw package
 #		f = tempfile.NamedTemporaryFile()
 		f = open('tmp.svg', 'wb')
 		import target_svg
 		target = target_svg.get_target()
 		target.add_package(package)
-
-		from pprint import pprint
-		pprint(package['values'])
 
 		process = {	'F': TolLen(0, 0.05, 1),
 					'P': TolLen(0, 0.05, 1) }
@@ -197,25 +207,68 @@ class Editor:
 		target.output(f)
 		f.flush()
 
-#		w.horizontalLayout.removeWidget(w.graphicsView)
-#		w.graphicsView.setParent(None)
-#		w.graphicsView = QSvgWidget(f.name)
-#		w.horizontalLayout.addWidget(w.graphicsView)
-
+		# Draw SVG output
 		svg = QGraphicsSvgItem(f.name)
-#		svg = QGraphicsSvgItem('test.svg')
-#		svg = QGraphicsSvgItem('packages/{}.svg'.format(package['type']))
 		scene = QGraphicsScene()
 		scene.addItem(svg)
-		# Units will be pixels...
-		w.graphicsView.setScene(scene)
-#		w.graphicsView.rotate(45)
-#		w.graphicsView.scale(10,10)
-#		w.graphicsView.translate(1e4,1e4)
 
-
+		self.package_ui.graphicsView.setScene(scene)
 
 		f.close()
+
+
+	def on_package_value_edited(self, d, edit, text):
+
+		import re
+
+		match = False
+		package = self.current_package
+
+		if(d[1] == 't'):
+			if(re.match('^\s*\d+(\.\d+)?\s*-\s*\d+(\.\d+)?\s*$', text)):
+				match = True
+
+				# Update value in package
+				r = re.findall('([\d\.]+)', text)
+				min = float(r[0])
+				max = float(r[1])
+
+				package['values'][d[1]] = TolLen(min, max)
+				self.update_package_view()
+
+		elif(d[1] == 'a'):
+			if(re.match('^\s*\d*(\s+\d+)*\s*$', text)):
+				match = True
+
+		elif(d[1] == 'm'):
+			if(re.match('-', text)):
+				match = True
+
+		elif(d[1] == 'f'):
+			if(re.match('^\s*\d+(\.\d+)?\s*$', text)):
+				match = True
+
+				# Update value in package
+				val = float(text)
+
+				package['values'][d[0]] = val
+				self.update_package_view()
+
+		elif(d[1] == 'i'):
+			if(re.match('^\s*\d+\s*$', text)):
+				match = True
+
+				# Update value in package
+				val = int(text)
+
+				package['values'][d[0]] = val
+				self.update_package_view()
+
+		if(match):
+			edit.setStyleSheet('')
+		else:
+			edit.setStyleSheet('QLineEdit { background: rgb(255, 40, 40);}')
+
 
 
 	def on_devices_select(self):

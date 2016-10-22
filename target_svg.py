@@ -35,9 +35,6 @@ class SVG:
 
 	def output(self, fout):
 
-		import pprint
-		pprint.pprint(self.package)
-
 		package = self.package
 
 		for pad in package['pads']:

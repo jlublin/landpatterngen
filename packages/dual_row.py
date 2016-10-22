@@ -14,7 +14,17 @@ def get_package(part, design, process):
 	return DualRow(part, design, process)
 
 def get_params():
-	return ['E1:', 'D:', 'e', 'E:', 'S:', 'L:', 'b:', 'npin', 'mark', 'deleted*']
+	return [
+		('E1', 't'),
+		('D', 't'),
+		('e', 'f'),
+		('E', 't'),
+		('S', 't'),
+		('L', 't'),
+		('b', 't'),
+		('npin', 'i'),
+		('mark', 'm'),
+		('deleted', 'a')]
 
 class DualRow:
 
