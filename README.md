@@ -5,7 +5,14 @@ LandPatternGen is a tool for creating land patterns for PCB design. Patterns are
 
 Requirements
 ============
+Qt5
+PyQt5
+Sqlite3
 
+Examples
+========
+Included example library can be used created using:
+sqlite3 library.sqlite3 <example.sql
 
 Installing Qt5
 --------------
