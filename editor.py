@@ -187,11 +187,6 @@ class Editor:
 
 	def set_device(self, dev, i):
 
-		print(dev, i)
-
-		from pprint import pprint
-		pprint(self.devices)
-
 		packages = self.devices[i]['dev_packages']
 
 		package_names = [x['name'] for x in packages]
@@ -233,11 +228,6 @@ class Editor:
 
 
 	def set_package(self, pac, i):
-
-		print(pac, i)
-
-		from pprint import pprint
-		pprint(self.packages)
 
 		# Add to Qt table
 		item = QTableWidgetItem(pac['type'])
