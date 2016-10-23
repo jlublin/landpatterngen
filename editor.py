@@ -106,6 +106,10 @@ class Editor:
 		self.wnd.packages.setContextMenuPolicy(Qt.CustomContextMenu)
 		self.wnd.packages.customContextMenuRequested.connect(self.on_packages_context)
 
+		# Add connections for editing data in tables
+		self.wnd.devices.cellChanged.connect(self.update_device)
+		self.wnd.packages.cellChanged.connect(self.update_package)
+
 		c.close()
 		conn.close()
 
@@ -176,6 +180,15 @@ class Editor:
 		self.wnd.devices.removeRow(i)
 
 
+	def update_device(self, i, j):
+
+		self.devices[i]['manufacturer'] = self.wnd.devices.item(i,1).text()
+		self.devices[i]['description'] = self.wnd.devices.item(i,2).text()
+		self.devices[i]['datasheet'] = self.wnd.devices.item(i,3).text()
+
+		self.on_devices_select()
+
+
 	def update_devices_labels(self):
 
 		devices = self.devices
@@ -225,6 +238,14 @@ class Editor:
 
 		self.packages.pop(i)
 		self.wnd.packages.removeRow(i)
+
+
+	def update_package(self, i, j):
+
+		self.packages[i]['manufacturer'] = self.wnd.packages.item(i,1).text()
+		self.packages[i]['datasheet'] = self.wnd.packages.item(i,2).text()
+
+		self.on_packages_select()
 
 
 	def set_package(self, pac, i):
