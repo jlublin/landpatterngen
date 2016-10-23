@@ -88,64 +88,68 @@ class Editor:
 			# Add mount pads
 			c.execute('SELECT w,h,x,y FROM pac_mount_pads WHERE package_id=:id', {'id': pac['id']})
 			mount_pads = [dict(x) for x in c.fetchall()]
+
 			if(mount_pads):
 				self.packages[i]['values']['mount_pads'] = mount_pads
 
-			# Add to Qt table
-			item = QTableWidgetItem(pac['type'])
-			item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
-			self.wnd.packages.setItem(i, 0, item)
-
-			self.wnd.packages.setItem(i, 1, QTableWidgetItem(pac['manufacturer']))
-			self.wnd.packages.setItem(i, 2, QTableWidgetItem(pac['datasheet']))
+			self.set_package(pac, i)
 
 			i += 1
 
 		# Show packages tab
 		self.wnd.tabWidget_2.setCurrentIndex(0)
 
-		# Add context menu for adding/removing entries
-		self.wnd.tabWidget_2.setContextMenuPolicy(Qt.CustomContextMenu)
-		self.wnd.tabWidget_2.customContextMenuRequested.connect(self.on_table_context)
+		# Add context menus for adding/removing entries
+		self.wnd.devices.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.wnd.devices.customContextMenuRequested.connect(self.on_device_context)
+
+		self.wnd.packages.setContextMenuPolicy(Qt.CustomContextMenu)
+		self.wnd.packages.customContextMenuRequested.connect(self.on_packages_context)
 
 		c.close()
 		conn.close()
 
 
-	def on_table_context(self, pos):
+	def on_device_context(self, pos):
 
 		menu = QMenu('ctx menu', self.wnd)
 
-		tab_i = self.wnd.tabWidget_2.currentIndex()
+		i = self.wnd.devices.currentRow()
 
-		if(tab_i == 0):
-			device = self.wnd.devices.currentRow()
+		addb = QAction('Insert device before', self.wnd)
+		adda = QAction('Insert device after', self.wnd)
+		delete = QAction('Delete device', self.wnd)
 
-			add = QAction('Insert device before', self.wnd)
-			delete = QAction('Delete device', self.wnd)
+		addb.triggered.connect(lambda: self.add_device(i))
+		adda.triggered.connect(lambda: self.add_device(i+1))
+		delete.triggered.connect(lambda: self.delete_device(i))
 
-			add.triggered.connect(lambda: self.add_device(device))
-			delete.triggered.connect(lambda: self.delete_device(device))
+		menu.addAction(addb)
+		menu.addAction(adda)
+		menu.addAction(delete)
 
-			menu.addAction(add)
-			menu.addAction(delete)
+		menu.exec(self.wnd.devices.mapToGlobal(pos))
 
-		elif(tab_i == 1):
-			package = self.wnd.packages.currentRow()
 
-			add = QAction('Add package', self.wnd)
-			delete = QAction('Delete package', self.wnd)
+	def on_packages_context(self, pos):
 
-			add.triggered.connect(lambda: print('add package'))
-			delete.triggered.connect(lambda: print('delete {}'.format(package)))
+		menu = QMenu('ctx menu', self.wnd)
 
-			menu.addAction(add)
-			menu.addAction(delete)
+		i = self.wnd.packages.currentRow()
 
-		elif(tab_i == 2):
-			pass
+		addb = QAction('Insert package before', self.wnd)
+		adda = QAction('Insert package after', self.wnd)
+		delete = QAction('Delete package', self.wnd)
 
-		menu.exec(self.wnd.tabWidget_2.mapToGlobal(pos))
+		addb.triggered.connect(lambda: self.add_package(i))
+		adda.triggered.connect(lambda: self.add_package(i+1))
+		delete.triggered.connect(lambda: self.delete_package(i))
+
+		menu.addAction(addb)
+		menu.addAction(adda)
+		menu.addAction(delete)
+
+		menu.exec(self.wnd.packages.mapToGlobal(pos))
 
 
 	def add_device(self, i):
@@ -200,6 +204,50 @@ class Editor:
 		self.wnd.devices.setItem(i, 3, QTableWidgetItem(dev['datasheet']))
 
 
+	def add_package(self, i):
+
+		package = \
+			{
+				'name': '',
+				'type': '',
+				'manufacturer': '',
+				'datasheet': '',
+				'values':
+				{
+					'pac_deleted_pins': [],
+					'pac_holes': [],
+					'pac_mount_pads': []
+					# TODO, the rest depends on type
+				}
+			}
+
+		self.packages.insert(i, package)
+		self.wnd.packages.insertRow(i)
+		self.set_package(package, i)
+
+
+	def delete_package(self, i):
+
+		self.packages.pop(i)
+		self.wnd.packages.removeRow(i)
+
+
+	def set_package(self, pac, i):
+
+		print(pac, i)
+
+		from pprint import pprint
+		pprint(self.packages)
+
+		# Add to Qt table
+		item = QTableWidgetItem(pac['type'])
+		item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+		self.wnd.packages.setItem(i, 0, item)
+
+		self.wnd.packages.setItem(i, 1, QTableWidgetItem(pac['manufacturer']))
+		self.wnd.packages.setItem(i, 2, QTableWidgetItem(pac['datasheet']))
+
+
 	def on_open(self):
 		self.fw = QFileDialog(filter='*.sqlite3')
 
@@ -230,7 +278,10 @@ class Editor:
 		oldw.widget().setParent(None)
 
 		# Add package values
-		mod = importlib.import_module('packages.{}'.format(package['type']))
+		try:
+			mod = importlib.import_module('packages.{}'.format(package['type']))
+		except ImportError:
+			return
 
 		x = 0
 		y = 0
@@ -272,7 +323,10 @@ class Editor:
 
 		package = self.current_package
 
-		mod = importlib.import_module('packages.{}'.format(package['type']))
+		try:
+			mod = importlib.import_module('packages.{}'.format(package['type']))
+		except ImportError:
+			return
 
 		# Draw package
 #		f = tempfile.NamedTemporaryFile()
