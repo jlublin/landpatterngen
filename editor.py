@@ -282,6 +282,14 @@ class Editor:
 		package = self.packages[i]
 		self.current_package = package
 
+		# Add package types
+		import packages
+		for type in packages.__all__:
+			w.types.addItem(type)
+
+			if(type == package['type']):
+				w.types.setCurrentIndex(w.types.count() - 1)
+
 		# Add package widget
 		oldw = self.wnd.verticalLayout_2.itemAt(1)
 		self.wnd.verticalLayout_2.removeItem(oldw)

@@ -99,6 +99,9 @@
         </attribute>
         <layout class="QVBoxLayout" name="vert34">
          <item>
+          <widget class="QComboBox" name="types"/>
+         </item>
+         <item>
           <layout class="QGridLayout" name="grid_values"/>
          </item>
          <item>
