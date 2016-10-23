@@ -290,6 +290,8 @@ class Editor:
 			if(type == package['type']):
 				w.types.setCurrentIndex(w.types.count() - 1)
 
+		w.types.currentTextChanged.connect(self.update_package_type)
+
 		# Add package widget
 		oldw = self.wnd.verticalLayout_2.itemAt(1)
 		self.wnd.verticalLayout_2.removeItem(oldw)
@@ -370,6 +372,31 @@ class Editor:
 		self.package_ui.graphicsView.setScene(scene)
 
 		f.close()
+
+
+	def update_package_type(self, type):
+
+		try:
+			mod = importlib.import_module('packages.{}'.format(type))
+		except ImportError:
+			return
+
+		self.current_package['type'] = type
+
+		for d in mod.get_params():
+			if(d[0] not in self.current_package['values']):
+				if(d[1] == 't'):
+					self.current_package['values'][d[0]] = TolLen(0,0)
+				elif(d[1] == 'i'):
+					self.current_package['values'][d[0]] = 0
+				elif(d[1] == 'f'):
+					self.current_package['values'][d[0]] = 0.0
+				elif(d[1] == 'm'):
+					self.current_package['values'][d[0]] = '-'
+				elif(d[1] == 'a'):
+					self.current_package['values'][d[0]] = []
+				elif(d[1] == 'l'):
+					self.current_package['values'][d[0]] = 'Flat Ribbon L and Gull-Wing Leads (> 0.625mm pitch)'
 
 
 	def on_package_value_edited(self, d, edit, text):

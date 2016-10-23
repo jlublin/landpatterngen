@@ -10,9 +10,12 @@ import ipc7351
 import packages.quad_row
 
 def get_package(part, design, process):
-	return SOT23(part, design, process)
+	return QFN(part, design, process)
 
-class SOT23:
+def get_params():
+	return []
+
+class QFN:
 
 	# part contains D, E, e, L, b, npin
 	# design contais 'IPC7351-x' where x in {A,B,C}
@@ -32,7 +35,7 @@ class SOT23:
 		part['E1'] = part['E']
 		part['npin1'] = part['npin'] // 4
 		part['npin2'] = part['npin'] // 4
-		part['mark'] = 'circle'
+#		part['mark'] = 'circle' # TODO, SVG doesn't handle this yet
 		part['deleted'] = None
 
 		# IPC7351 density level A, B or C
@@ -49,4 +52,5 @@ class SOT23:
 
 	def gen(self, target):
 
+		return
 		self.generator.gen(target)

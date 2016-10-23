@@ -1,5 +1,11 @@
 from tollen import TolLen
 
+def get_package(part, design, process):
+	return QuadRow(part, design, process)
+
+def get_params():
+	return []
+
 class QuadRow:
 
 	# part containts L, b, S, E, e, E1, D, D1, npin, deleted, mark
@@ -107,6 +113,7 @@ class QuadRow:
 		# C,e,G,X,Y,Z
 	def gen(self, target):
 
+		return
 		E1 = self.part['E1']
 		D = self.part['D']
 		D1 = self.part['D1']

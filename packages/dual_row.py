@@ -24,7 +24,18 @@ def get_params():
 		('b', 't'),
 		('npin', 'i'),
 		('mark', 'm'),
-		('deleted', 'a')]
+		('deleted_pins', 'a'),
+		('holes', 'a'),
+		('mount_pads', 'a'),
+		('lead_type', 'l'),
+		('C', 'f'),
+		('G', 'f'),
+		('X', 'f'),
+		('Y', 'f'),
+		('Z', 'f'),
+		('pin_order', 'i'),
+		('row_offset1', 'f'),
+		('row_offset2', 'f')]
 
 class DualRow:
 
